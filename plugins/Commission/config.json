@@ -1,0 +1,18 @@
+{
+    "code": "commission",
+    "name": {
+        "zh_cn": "分销返佣",
+        "en": "Commission"
+    },
+    "description": {
+        "zh_cn": "通过分佣地址进入下单，会员获得对应的佣金",
+        "en": "Through the share url to enter and place the order, the member gets the corresponding commission."
+    },
+    "type": "feature",
+    "version": "v1.6.6",
+    "icon": "/image/logo.png",
+    "author": {
+        "name": "撸串青年",
+        "email": "2909110833@qq.com"
+    }
+}

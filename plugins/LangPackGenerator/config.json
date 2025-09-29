@@ -1,0 +1,18 @@
+{
+    "code": "lang_pack_generator",
+    "name": {
+        "zh_cn": "语言翻译助手|全面支持内容翻译！",
+        "en": "Language Pack Generator"
+    },
+    "description": {
+        "zh_cn": "原名: 语言包生成器,最好用的翻译插件, 可快速生成多国语言包以及插件包 插件支持文本表单翻译, 可翻译:文章内容、商品详情、sku名称、文章、导航、设计等等, 解决文本翻译困扰!, 让维护从此简单!",
+        "en": "Language pack generator, AI fast one-click generation of multi-national language packs, software goes all over the world!"
+    },
+    "type": "translator",
+    "version": "v1.5.1",
+    "icon": "/image/logo.png",
+    "author": {
+        "name": "1cli",
+        "email": "912551778@qq.com"
+    }
+}
