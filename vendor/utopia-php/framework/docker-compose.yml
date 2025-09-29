@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+    web:
+        build: .
+        ports:
+            - "9020:80"
+        volumes:
+            - ./src:/usr/share/nginx/html/src
+            - ./tests:/usr/share/nginx/html/tests
