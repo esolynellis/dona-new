@@ -152,9 +152,110 @@
               @endhookwrapper
               <ul class="totals">
                 @foreach ($totals as $total)
-                <li><span>{{ $total['title'] }}</span><span>{{ $total['amount_format'] }}</span></li>
+                @if ($total['code'] === 'sub_total')
+                <li class="subtotal-row">
+                  <span>{{ $total['title'] }}</span>
+                  <span>{{ $total['amount_format'] }}</span>
+                </li>
+                @elseif (!empty($total['icon_type']))
+                <li class="custom-fee-row">
+                  <span class="custom-fee-left">
+                    @if ($total['icon_type'] === 'customs')
+                    <span class="custom-fee-icon customs-icon">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+                    </span>
+                    @else
+                    <span class="custom-fee-icon transport-icon">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                    </span>
+                    @endif
+                    <span class="custom-fee-text">
+                      <span class="custom-fee-title">{{ $total['title'] }}</span>
+                      <span class="custom-fee-desc">{{ $total['description'] }}</span>
+                    </span>
+                  </span>
+                  <span class="custom-fee-amount">{{ $total['amount_format'] }}</span>
+                </li>
+                @elseif (!empty($total['is_subtotal']))
+                <li class="transport-subtotal-row">
+                  <span>{{ $total['title'] }}</span>
+                  <span>{{ $total['amount_format'] }}</span>
+                </li>
+                @elseif ($total['code'] === 'order_total')
+                <li class="order-total-row">
+                  <span>Нийт дүн</span>
+                  <span>{{ $total['amount_format'] }}</span>
+                </li>
+                @endif
                 @endforeach
               </ul>
+              <style>
+                /* Бүтээгдэхүүний нийт дүн */
+                ul.totals li.subtotal-row {
+                  display: flex;
+                  justify-content: space-between;
+                  padding: 6px 0;
+                  font-size: 0.85rem;
+                  font-weight: 600;
+                  color: #111827;
+                  border-bottom: 1px dotted #d1d5db;
+                  margin-bottom: 4px;
+                }
+                /* Гааль / тээвэр икон мөр */
+                ul.totals li.custom-fee-row {
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-between;
+                  padding: 6px 0;
+                  gap: 8px;
+                }
+                .custom-fee-left {
+                  display: flex;
+                  align-items: flex-start;
+                  gap: 8px;
+                  flex: 1;
+                }
+                .custom-fee-icon {
+                  display: inline-flex;
+                  align-items: center;
+                  justify-content: center;
+                  width: 28px;
+                  height: 28px;
+                  border-radius: 50%;
+                  flex-shrink: 0;
+                  margin-top: 1px;
+                }
+                .custom-fee-icon svg { width: 14px; height: 14px; }
+                .customs-icon { background-color: #dbeafe; color: #2563eb; }
+                .transport-icon { background-color: #dcfce7; color: #16a34a; }
+                .custom-fee-text { display: flex; flex-direction: column; }
+                .custom-fee-title { font-size: 0.85rem; font-weight: 500; color: #374151; }
+                .custom-fee-desc  { font-size: 0.72rem; color: #9ca3af; line-height: 1.3; }
+                .custom-fee-amount { font-size: 0.85rem; font-weight: 500; white-space: nowrap; flex-shrink: 0; }
+                /* Нийт тээвэрлэлтийн дүн */
+                ul.totals li.transport-subtotal-row {
+                  display: flex;
+                  justify-content: space-between;
+                  padding: 6px 0;
+                  font-size: 0.85rem;
+                  font-weight: 600;
+                  color: #111827;
+                  border-top: 1px dashed #d1d5db;
+                  margin-top: 2px;
+                }
+                /* Нийт дүн */
+                ul.totals li.order-total-row {
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  padding: 10px 0 4px;
+                  font-size: 1rem;
+                  font-weight: 700;
+                  color: #111827;
+                  border-top: 2px solid #e5e7eb;
+                  margin-top: 6px;
+                }
+              </style>
               <div class="d-grid gap-2 mt-3 submit-checkout-wrap">
                 @if (is_mobile())
                 <div class="text-nowrap">
@@ -238,7 +339,34 @@
   }
 
   const updateTotal = (totals) => {
-    $('ul.totals').html(totals.map((item) => `<li><span>${item.title}</span><span>${item.amount_format}</span></li>`).join(''));
+    const customsIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>`;
+    const transportIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>`;
+    $('ul.totals').html(totals.map((item) => {
+      if (item.code === 'sub_total') {
+        return `<li class="subtotal-row"><span>${item.title}</span><span>${item.amount_format}</span></li>`;
+      }
+      if (item.is_subtotal) {
+        return `<li class="transport-subtotal-row"><span>${item.title}</span><span>${item.amount_format}</span></li>`;
+      }
+      if (item.code === 'order_total') {
+        return `<li class="order-total-row"><span>Нийт дүн</span><span>${item.amount_format}</span></li>`;
+      }
+      if (item.icon_type) {
+        const iconClass = item.icon_type === 'customs' ? 'customs-icon' : 'transport-icon';
+        const iconSvg   = item.icon_type === 'customs' ? customsIconSvg : transportIconSvg;
+        return `<li class="custom-fee-row">
+          <span class="custom-fee-left">
+            <span class="custom-fee-icon ${iconClass}">${iconSvg}</span>
+            <span class="custom-fee-text">
+              <span class="custom-fee-title">${item.title}</span>
+              <span class="custom-fee-desc">${item.description ?? ''}</span>
+            </span>
+          </span>
+          <span class="custom-fee-amount">${item.amount_format}</span>
+        </li>`;
+      }
+      return '';
+    }).join(''));
   }
 
   const updateShippingMethods = (data, shipping_method_code) => {

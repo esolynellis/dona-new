@@ -22,6 +22,7 @@ class TotalService
         'tax',
         'shipping',
         'customer_discount',
+        'custom_fee',
     ];
 
     protected Cart $currentCart;

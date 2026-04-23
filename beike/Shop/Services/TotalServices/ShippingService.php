@@ -45,7 +45,11 @@ class ShippingService
         if (! method_exists($className, 'getShippingFee')) {
             throw new \Exception("请在插件 {$className} 实现方法: public function getShippingFee(CheckoutService \$checkout)");
         }
-        $amount    = (float) (new $className)->getShippingFee($checkout);
+        $amount = (float) (new $className)->getShippingFee($checkout);
+        if ($amount <= 0) {
+            return null;
+        }
+
         $totalData = [
             'code'          => 'shipping',
             'title'         => trans('shop/carts.shipping_fee'),

@@ -49,17 +49,6 @@ class Bootstrap
      */
     public function getShippingFee(CheckoutService $checkout): float|int
     {
-        $totalService  = $checkout->totalService;
-        $amount        = $totalService->amount;
-        $shippingType  = plugin_setting('flat_shipping.type', 'fixed');
-        $shippingValue = plugin_setting('flat_shipping.value', 0);
-        if ($shippingType == 'fixed') {
-            return $shippingValue;
-        } elseif ($shippingType == 'percent') {
-            return $amount * $shippingValue / 100;
-        }
-
         return 0;
-
     }
 }
