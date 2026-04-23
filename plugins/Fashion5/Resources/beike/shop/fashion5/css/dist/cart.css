@@ -1,0 +1,58 @@
+/**
+ * @copyright     2022 beikeshop.com - All Rights Reserved.
+ * @link          https://beikeshop.com
+ * @Author        pu shuo <pushuo@guangda.work>
+ * @Date          2022-08-15 17:35:29
+ * @LastEditTime  2022-09-16 20:47:16
+ */
+body.page-cart .cart-products-wrap .table tbody {
+  border-top: none;
+}
+body.page-cart .cart-products-wrap .table tbody td {
+  vertical-align: middle;
+  border-color: #f0f2f4;
+}
+body.page-cart .cart-products-wrap .table tbody tr.active {
+  background-color: #fff6f1;
+}
+body.page-cart .cart-products-wrap .table thead {
+  background-color: #F8F9FA;
+}
+body.page-cart .cart-products-wrap .table thead th {
+  border-bottom: none;
+  padding: 0.7rem 0.5rem;
+  box-shadow: none;
+  white-space: nowrap;
+}
+body.page-cart .cart-products-wrap .table .p-image input {
+  flex: 0 0 1;
+}
+body.page-cart .total-wrap {
+  border: none;
+  background-color: #F8F9FA;
+}
+body.page-cart .total-wrap.total-wrap-fixed {
+  position: fixed;
+  top: 0;
+  right: 0;
+}
+body.page-cart .total-wrap .card-header {
+  padding-top: 1rem;
+  border-bottom: none;
+  background-color: transparent;
+}
+body.page-cart .total-wrap .list-group li {
+  background-color: transparent;
+  padding: 0.7rem 0;
+  border-color: #EEEEEE;
+}
+body.page-cart .total-wrap .list-group li:not(.d-grid) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+body.page-cart .total-wrap .list-group li .total-price {
+  color: #222222;
+  font-size: 1.2rem;
+  font-weight: bold;
+}

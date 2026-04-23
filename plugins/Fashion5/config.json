@@ -1,0 +1,19 @@
+{
+    "code": "fashion5",
+    "name": {
+        "zh_cn": "数码3C电子产品模板-蓝色简约模板",
+        "en": "Hardware & Machinery Machine Tool Template - Black&Yellow Contrast Theme"
+    },
+    "description": {
+        "zh_cn": "Fashion 5 电子数码/3C/家电/手机/电脑/数码配件",
+        "en": "Fashion 5 Electronics/3C/Home Appliances/Mobile/Computer/Digital Accessories"
+    },
+    "type": "theme",
+    "version": "v1.3.0",
+    "icon": "/image/logo.png",
+    "theme": "/image/theme.jpg",
+    "author": {
+        "name": "成都光大网络科技有限公司",
+        "email": "pushuo@guangda.work"
+    }
+}

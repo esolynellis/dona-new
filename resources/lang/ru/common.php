@@ -100,4 +100,6 @@ return [
     'whether_open'         => 'открывать ли',
     'yes'                  => 'да',
     'text_total'           => 'Итого',
+    'importing' => 'Импортируется...',
+    'import_failed' => 'Импорт не удался',
 ];

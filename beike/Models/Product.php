@@ -24,6 +24,7 @@ class Product extends Base
         'variables',
         'goods_id',
         'goods_code',
+        'min',
         'gunit_max',
         'gnum_midd',
         'gunit_midd',

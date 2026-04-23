@@ -69,6 +69,6 @@ class HuipiGoodsController extends Controller
 
         $result = $this->syncService->syncGoodsByIds($goodsIds);
 
-        return response()->json($result, $result['code'] == 1 ? 200 : 400);
+        return response()->json($result);
     }
 }

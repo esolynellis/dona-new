@@ -483,7 +483,7 @@ class ProductRepo
 
     public static function list($data = [])
     {
-        return static::getBuilder($data)->paginate($data['per_page'] ?? 20);
+        return static::getBuilder($data)->paginate($data['per_page'] ?? 50);
     }
 
     public static function autocomplete($name)

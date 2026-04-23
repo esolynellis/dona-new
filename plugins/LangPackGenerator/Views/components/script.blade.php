@@ -1,4 +1,4 @@
-<iframe class="langIframe" frameborder="no" border="0" marginwidth="0" marginheight="0"   allowtransparency="yes" width="100%" height="37px" src="{{ admin_route('LangPackGenerator.component', ['component'  => $component??'common']) }}"></iframe>
+<iframe class="langIframe" frameborder="no" border="0" marginwidth="0" marginheight="0"   allowtransparency="yes" width="100%" height="60px" src="{{ admin_route('LangPackGenerator.component', ['component'  => $component??'common']) }}"></iframe>
 
 @if(in_array($component,['product', 'article']))
 <div style="color: #aaa;font-size: 10px">

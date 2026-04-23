@@ -74,6 +74,17 @@
 
           @if ($type != 'trashed' && $products->total())
             <div class="right nowrap">
+              {{-- 添加批量上传按钮 --}}
+              <button class="btn btn-success" @click="openBatchUploadModal">
+                <i class="bi bi-upload"></i> {{ __('admin/product.batch_upload') }}
+              </button>
+              {{-- 添加导出和导入按钮 --}}
+              <button class="btn btn-outline-info" :disabled="!selectedIds.length" @click="exportProducts">
+                <i class="bi bi-download"></i> {{ __('admin/product.export') }}
+              </button>
+              <button class="btn btn-outline-info" @click="openImportModal">
+                <i class="bi bi-upload"></i> {{ __('admin/product.import') }}
+              </button>
               <button class="btn btn-outline-secondary" :disabled="!selectedIds.length" @click="batchDelete">{{ __('admin/product.batch_delete')  }}</button>
               <button class="btn btn-outline-secondary" :disabled="!selectedIds.length"
               @click="batchActive(true)">{{ __('admin/product.batch_active') }}</button>
@@ -93,6 +104,7 @@
                   <th>{{ __('product.image') }}</th>
                   <th>{{ __('product.name') }}</th>
                   <th>{{ __('product.price') }}</th>
+                  <th>{{ __('admin/product.cost_price') }}</th>
                   <th>
                     <div class="d-flex align-items-center">
                         {{ __('common.created_at') }}
@@ -131,6 +143,7 @@
                     <a href="{{ $product['url'] }}" target="_blank" title="{{ $product['name'] }}" class="text-dark">{{ $product['name'] }}</a>
                   </td>
                   <td>{{ $product['price_formatted'] }}</td>
+                  <td>{{ $product['cost_price'] }}</td>
                   <td>{{ $product['created_at'] }}</td>
                   <td>{{ $product['position'] }}</td>
                   @if ($type != 'trashed')
@@ -163,6 +176,150 @@
         @endif
       </div>
     </div>
+    <div class="modal fade" id="batchUploadModal" tabindex="-1" role="dialog" aria-hidden="true" v-if="showBatchUploadModal">
+      <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header" style="justify-content: space-between;">
+            <h5 class="modal-title">{{ __('admin/product.batch_upload') }}</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close" @click="closeBatchUploadModal">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="alert alert-info">
+              <h6>{{ __('admin/product.batch_upload_instructions') }}</h6>
+              <ul class="mb-0 pl-3">
+                <li>{{ __('admin/product.batch_upload_tips') }}</li>
+                <li>{{ __('admin/product.csv_format_required') }}</li>
+                <li>{{ __('admin/product.sku_must_unique') }}</li>
+                <li>{{ __('admin/product.batch_upload_supported_fields') }}</li>
+              </ul>
+            </div>
+
+            <form id="batchUploadForm" action="" method="POST" enctype="multipart/form-data">
+              @csrf
+              <div class="form-group">
+                <label for="csv_file">{{ __('admin/product.select_csv_file') }}</label>
+                <input type="file" class="form-control" ref="batchFile" accept=".xls" required>
+                <small class="form-text text-muted">{{ __('admin/product.max_file_size') }}</small>
+              </div>
+
+              <div class="form-check mb-3">
+                <input type="checkbox" class="form-check-input" name="skip_errors" id="skip_errors" value="1">
+                <label class="form-check-label" for="skip_errors">
+                  {{ __('admin/product.skip_error_rows') }}
+                </label>
+              </div>
+            </form>
+
+            <div class="mt-3">
+              <a href="{{ admin_route('products.batch_template') }}" class="btn btn-sm btn-outline-primary">
+                <i class="bi bi-download"></i> {{ __('admin/product.download_template') }}
+              </a>
+              <button type="button" class="btn btn-sm btn-outline-secondary" @click="showFieldMapping = !showFieldMapping">
+                <i class="bi bi-list"></i> {{ __('admin/product.view_field_mapping') }}
+              </button>
+            </div>
+
+            <div class="mt-3" v-if="showFieldMapping">
+              <div class="card">
+                <div class="card-header">
+                  <h6 class="mb-0">{{ __('admin/product.field_mapping') }}</h6>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <strong>{{ __('admin/product.required_fields') }}:</strong>
+                      <ul class="mb-2">
+                        <li>name_zh,name_en,name_mn,name_ru- {{ __('admin/product.field_name_zh') }}</li>
+                        <li>gunit_max_zh,gunit_max_en,gunit_max_mn,gunit_max_ru- {{ __('admin/product.field_gunit_max_zh') }}</li>
+                        <li>gunit_min_zh,gunit_min_en,gunit_min_mn,gunit_min_ru- {{ __('admin/product.field_gunit_min_zh') }}</li>
+                        <li>min_purchasing_price - {{ __('admin/product.field_min_purchasing_price') }}</li>
+                        <li>brand_name - {{ __('admin/product.field_brand_name') }}</li>
+                        <li>price - {{ __('admin/product.field_price') }}</li>
+                        <li>origin_price - {{ __('admin/product.field_origin_price') }}</li>
+                        <li>cost_price - {{ __('admin/product.field_cost_price') }}</li>
+                        <li>gnum_min - {{ __('admin/product.field_gnum_min') }}</li>
+                        <li>quantity - {{ __('admin/product.field_quantity') }}</li>
+                        <li>category_id - {{ __('admin/product.field_category_id') }}</li>
+                        <li>goods_code - {{ __('admin/product.field_goods_code') }}</li>
+                        <li>min - {{ __('admin/product.field_min') }}</li>
+                        <li>images - {{ __('admin/product.field_images') }}</li>
+                      </ul>
+                    </div>
+                    <div class="col-md-6">
+                      <strong>{{ __('admin/product.optional_fields') }}:</strong>
+                      <ul class="mb-0">
+                        <li>gunit_midd_zh,gunit_midd_en,gunit_midd_mn,gunit_midd_ru - {{ __('admin/product.field_gunit_midd_zh') }}</li>
+                        <li>gnum_midd - {{ __('admin/product.field_gnum_midd') }}</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" @click="closeBatchUploadModal">{{ __('common.cancel') }}</button>
+            <button type="button" class="btn btn-primary" @click="importBatch" :disabled="uploading">
+              <span v-if="uploading">
+                <i class="bi bi-hourglass-split"></i> {{ __('common.importing') }}
+              </span>
+              <span v-else>
+                <i class="bi bi-upload"></i> {{ __('common.confirm') }}
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- 将模态框移到 Vue 实例内部 -->
+    <!-- 导入模态框 -->
+    <div class="modal fade" id="importModal" tabindex="-1" role="dialog" aria-hidden="true" v-if="showImportModal">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header" style="justify-content: space-between;">
+            <h5 class="modal-title">{{ __('admin/product.import_translations') }}</h5>
+            {{-- 将关闭按钮移到右上方 --}}
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close" @click="closeImportModal">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="alert alert-info">
+              <h6>{{ __('admin/product.import_instructions') }}</h6>
+              <ul class="mb-0 pl-3">
+                <li>{{ __('admin/product.import_tips') }}</li>
+                <li>{{ __('admin/product.csv_format') }}</li>
+                <li>{{ __('admin/product.import_supported_languages') }}</li>
+              </ul>
+            </div>
+            <div class="form-group">
+              <label>{{ __('admin/product.select_file') }}</label>
+              <input type="file" class="form-control" ref="importFile" accept=".csv">
+              <small class="form-text text-muted">{{ __('admin/product.csv_format') }}</small>
+            </div>
+            <div class="mt-3">
+              <a href="{{ admin_route('products.download_template') }}" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-download"></i> {{ __('admin/product.download_template') }}
+              </a>
+            </div>
+          </div>
+          <div class="modal-footer">
+            {{-- 移除重复的关闭按钮，只保留取消按钮 --}}
+            <button type="button" class="btn btn-secondary" @click="closeImportModal">{{ __('common.cancel') }}</button>
+            <button type="button" class="btn btn-primary" @click="importProducts" :disabled="importing">
+          <span v-if="importing">
+            <i class="bi bi-hourglass-split"></i> {{ __('common.importing') }}
+          </span>
+              <span v-else>
+            <i class="bi bi-upload"></i> {{ __('common.confirm') }}
+          </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   @hook('admin.product.list.content.footer')
@@ -184,6 +341,11 @@
           sort: bk.getQueryString('sort', ''),
           order: bk.getQueryString('order', ''),
         },
+        showBatchUploadModal: false,
+        showImportModal: false,
+        showFieldMapping: false,
+        uploading: false,
+        importing: false,
         selectedIds: [],
         productIds: @json($products->pluck('id')),
       },
@@ -204,6 +366,140 @@
       },
 
       methods: {
+        // 打开批量上传模态框
+        openBatchUploadModal() {
+          this.showBatchUploadModal = true;
+          this.$nextTick(() => {
+            $('#batchUploadModal').modal('show');
+          });
+        },
+
+        // 关闭批量上传模态框
+        closeBatchUploadModal() {
+          this.showBatchUploadModal = false;
+          $('#batchUploadModal').modal('hide');
+          this.showFieldMapping = false;
+        },
+
+        // 导入商品翻译信息
+        importBatch() {
+          const fileInput = this.$refs.batchFile;
+          const file = fileInput.files[0];
+
+          if (!file) {
+            this.$message.warning('{{ __('admin/product.please_select_file') }}');
+            return;
+          }
+
+          // 检查文件类型
+          if (!file.name.toLowerCase().endsWith('.csv')&&!file.name.toLowerCase().endsWith('.xls')) {
+            this.$message.warning('{{ __('admin/product.csv_format') }}');
+            return;
+          }
+
+          this.uploading = true;
+
+          const formData = new FormData();
+          formData.append('csv_file', file);
+          formData.append('_token', '{{ csrf_token() }}');
+
+          $http.post('{{ admin_route("products.batch_store") }}', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
+          }).then((res) => {
+            this.$message.success(res.message);
+            this.showBatchUploadModal = false;
+            this.uploading = false;
+            fileInput.value = '';
+            // location.reload();
+          }).catch((error) => {
+            this.$message.error(error.message || '{{ __('common.import_failed') }}');
+            this.uploading = false;
+          });
+        },
+
+        // 打开导入模态框
+        openImportModal() {
+          this.showImportModal = true;
+          // 使用 $nextTick 确保 DOM 更新后再初始化模态框
+          this.$nextTick(() => {
+            $('#importModal').modal('show');
+          });
+        },
+
+        // 关闭导入模态框
+        closeImportModal() {
+          this.showImportModal = false;
+          $('#importModal').modal('hide');
+        },
+        // 导出商品翻译信息
+        exportProducts() {
+          if (!this.selectedIds.length) {
+            this.$message.warning('{{ __('admin/product.select_products_to_export') }}');
+            return;
+          }
+
+          const params = {
+            ids: this.selectedIds,
+            _token: '{{ csrf_token() }}'
+          };
+
+          // 创建表单进行下载
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = '{{ admin_route("products.export_translations") }}';
+
+          Object.keys(params).forEach(key => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = key;
+            input.value = params[key];
+            form.appendChild(input);
+          });
+
+          document.body.appendChild(form);
+          form.submit();
+          document.body.removeChild(form);
+        },
+
+        // 导入商品翻译信息
+        importProducts() {
+          const fileInput = this.$refs.importFile;
+          const file = fileInput.files[0];
+
+          if (!file) {
+            this.$message.warning('{{ __('admin/product.please_select_file') }}');
+            return;
+          }
+
+          // 检查文件类型
+          if (!file.name.toLowerCase().endsWith('.csv')) {
+            this.$message.warning('{{ __('admin/product.csv_format') }}');
+            return;
+          }
+
+          this.importing = true;
+
+          const formData = new FormData();
+          formData.append('file', file);
+          formData.append('_token', '{{ csrf_token() }}');
+
+          $http.post('{{ admin_route("products.import_translations") }}', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
+          }).then((res) => {
+            this.$message.success(res.message);
+            this.showImportModal = false;
+            this.importing = false;
+            fileInput.value = '';
+            location.reload();
+          }).catch((error) => {
+            this.$message.error(error.message || '{{ __('common.import_failed') }}');
+            this.importing = false;
+          });
+        },
         turnOnOff(event) {
           let id = event.currentTarget.getAttribute("data-id");
           let checked = event.currentTarget.getAttribute("data-active");

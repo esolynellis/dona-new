@@ -46,7 +46,7 @@
         </div>
         <div class="flex-1 right" v-if="currentMenu" :key="currentMenuIndex">
           <div class="d-lg-flex">
-            <div class="wp-200 ">
+            <div class="wp-500 ">
               <div class="mb-2">{{ __('admin/builder.main_menu_name_link') }}</div>
               <text-i18n v-model="currentMenu.name" class="mb-2"></text-i18n>
               {{-- <input type="text" v-model="currentMenu.name['zh_cn']"> --}}
@@ -54,17 +54,17 @@
               </link-selector>
             </div>
 
-            <div class="wp-200 ms-lg-5">
+            <div class="wp-500 ms-lg-5">
               <div class="mb-2 mt-3 mt-lg-0">{{ __('admin/builder.main_menu_label') }}</div>
               <text-i18n v-model="currentMenu.badge.name" class=""></text-i18n>
             </div>
 
-            <div class="wp-200 ms-lg-5">
+            <div class="wp-300 ms-lg-5">
               <div class="mb-2 mt-3 mt-lg-0">{{ __('admin/builder.label_background_color') }}</div>
               <el-color-picker v-model="currentMenu.badge.bg_color" size="small"></el-color-picker>
             </div>
 
-            <div class="wp-200">
+            <div class="wp-300">
               <div class="mb-2 mt-3 mt-lg-0">{{ __('admin/builder.label_text_color') }}</div>
               <el-color-picker v-model="currentMenu.badge.text_color" size="small"></el-color-picker>
             </div>
@@ -86,7 +86,7 @@
             </div>
             <draggable class="children-group d-lg-flex flex-wrap" style="margin: 0 -0.5rem" :list="currentMenu.childrenGroup"
               :options="{ animation: 330, handle: '.el-icon-rank' }">
-              <div class="card border mx-2 mb-3 group-item" v-for="group, group_index in currentMenu.childrenGroup"
+              <div class="card border mx-2 mb-3 wp-500 group-item1" v-for="group, group_index in currentMenu.childrenGroup"
                 :key="group_index">
                 <div class="card-header d-flex align-items-center justify-content-between mb-2">
                   <div class="" style="font-weight: 400">

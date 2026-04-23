@@ -1,0 +1,41 @@
+/**
+ * @copyright     2022 beikeshop.com - All Rights Reserved.
+ * @link          https://beikeshop.com
+ * @Author        pu shuo <pushuo@guangda.work>
+ * @Date          2022-09-01 16:23:34
+ * @LastEditTime  2022-09-16 20:57:19
+ */
+body.page-account {
+  background-color: #F7F8FA;
+}
+body.page-account .account-card {
+  border: none;
+}
+body.page-account .account-card .card-items > a {
+  width: 25%;
+  color: #444444;
+  text-decoration: none !important;
+}
+body.page-account .account-card .card-items > a i {
+  font-size: 2rem;
+}
+body.page-account .account-card .card-items > a span {
+  display: flex;
+}
+body.page-account .account-card .order-wrap {
+  background-color: #f6f8f9;
+  padding: 2rem 1rem;
+}
+body.page-account .account-card .order-wrap .icon i {
+  font-size: 4.5rem;
+  color: #777;
+}
+body.page-account .account-card .order-wrap .text {
+  font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+  .account-sides-info {
+    margin-bottom: 14px;
+  }
+}

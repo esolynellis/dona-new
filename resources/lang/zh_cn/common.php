@@ -106,4 +106,6 @@ return [
     'text_total'           => '总计',
     'text_loading'         => '加载中...',
     'pagination'         => '显示 :first - :last / 合计 :total（共 :last_page 页）',
+    'importing'                => '导入中...',
+    'import_failed'                => '导入失败',
 ];

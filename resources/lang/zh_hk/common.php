@@ -100,4 +100,6 @@ return [
     'whether_open'         => '是否開啟',
     'yes'                  => '是',
     'text_total'           => '總計',
+    'importing' => '導入中...',
+    'import_failed' => '導入失敗',
 ];

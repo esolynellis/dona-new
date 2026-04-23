@@ -1,0 +1,96 @@
+/**
+ * @copyright     2022 beikeshop.com - All Rights Reserved.
+ * @link          https://beikeshop.com
+ * @Author        pu shuo <pushuo@guangda.work>
+ * @Date          2022-09-09 19:16:39
+ * @LastEditTime  2022-09-16 20:55:37
+ */
+@media (max-width: 768px) {
+  body.page-login, body.page-forgotten {
+    overflow-x: hidden;
+  }
+}
+body.page-login .el-form-item__error--inline, body.page-forgotten .el-form-item__error--inline {
+  margin-left: 0;
+}
+body.page-login .forgotten-link, body.page-forgotten .forgotten-link {
+  display: block;
+  margin-top: -14px;
+}
+body.page-login .el-form-item, body.page-forgotten .el-form-item {
+  margin-bottom: 18px;
+}
+body.page-login .el-form-item .el-form-item__content, body.page-forgotten .el-form-item .el-form-item__content {
+  line-height: 1;
+}
+body.page-login .login-item-header, body.page-forgotten .login-item-header {
+  background: #f8f9fa;
+  border-bottom: none;
+  padding: 1.2rem 1.5rem;
+}
+body.page-login .login-item-header h6, body.page-forgotten .login-item-header h6 {
+  font-weight: bold;
+  font-size: 1rem;
+}
+body.page-login .vr-wrap, body.page-forgotten .vr-wrap {
+  margin: 0 80px;
+}
+@media (min-width: 768px) {
+  body.page-login .login-wrap, body.page-forgotten .login-wrap {
+    display: flex;
+    justify-content: center;
+  }
+}
+body.page-login .login-wrap .card, body.page-forgotten .login-wrap .card {
+  border: none;
+}
+@media (min-width: 768px) {
+  body.page-login .login-wrap .card, body.page-forgotten .login-wrap .card {
+    width: 340px;
+  }
+}
+body.page-login .form-iframe, body.page-forgotten .form-iframe {
+  margin-bottom: 30px;
+}
+@media (max-width: 768px) {
+  body.page-login .form-iframe, body.page-forgotten .form-iframe {
+    padding: 0;
+    margin-top: 0 !important;
+  }
+}
+body.page-login .form-iframe .vr-wrap, body.page-forgotten .form-iframe .vr-wrap {
+  margin: 0 60px;
+}
+body.page-login .form-iframe .card, body.page-forgotten .form-iframe .card {
+  border: none;
+}
+body.page-login .social-wrap .title, body.page-forgotten .social-wrap .title {
+  position: relative;
+  text-align: center;
+  color: #999;
+}
+body.page-login .social-wrap .title::before, body.page-forgotten .social-wrap .title::before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  left: 0;
+  height: 1px;
+  top: 47%;
+  background: #e5e5e5;
+}
+body.page-login .social-wrap .title span, body.page-forgotten .social-wrap .title span {
+  background-color: #fff;
+  position: relative;
+  padding: 0 5px;
+  z-index: 1;
+}
+body.page-login .social-wrap .btn, body.page-forgotten .social-wrap .btn {
+  color: #666;
+}
+body.page-login .social-wrap .btn img, body.page-forgotten .social-wrap .btn img {
+  position: absolute;
+  left: 40px;
+}
+body.page-login .social-wrap .btn:hover, body.page-forgotten .social-wrap .btn:hover {
+  background-color: #eee;
+}

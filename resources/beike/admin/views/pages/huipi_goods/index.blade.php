@@ -154,12 +154,16 @@
             this.syncLoading = true;
             return $http.post('huipi_goods/batchSync', { ids: this.checkedIds });
           }).then(res => {
-            this.$message.success(res.message || '同步完成');
-            this.checkedIds = [];   // 清空选择
-            this.checkAll = false;
-            this.loadData();        // 刷新列表
+            if(res.code == 1){
+              this.$message.success(res.msg || '同步完成');
+              this.checkedIds = [];   // 清空选择
+              this.checkAll = false;
+              this.loadData();        // 刷新列表
+            }else{
+              this.$message.error(res.msg || '同步失败')
+            }
           }).catch(e => {
-            if (e !== 'cancel') this.$message.error(e.message || '同步失败');
+            if (e !== 'cancel') this.$message.error(e.msg || '同步失败');
           }).finally(() => {
             this.syncLoading = false;
           });

@@ -29,6 +29,7 @@ class ProductResource extends JsonResource
             'price_formatted' => currency_format($masterSku->price),
             'active'          => $this->active,
             'position'        => $this->position,
+            'cost_price'        => currency_format($masterSku->cost_price),
             'url'             => $this->url,
             'created_at'      => time_format($this->created_at),
             'deleted_at'      => $this->deleted_at ? time_format($this->deleted_at) : '',

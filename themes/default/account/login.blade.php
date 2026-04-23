@@ -97,7 +97,7 @@
   </div>
   <div style="display: flex; justify-content: center; align-items: center;" id="page-login1">
     <div class="mt-5 mb-3" style="width: 20% !important;">
-      <a type="button" href="http://mn.btk123.com/app/" class="btn btn-dark btn-lg w-100 fw-bold"><i class="bi"></i> {{ __('shop/login.download') }}</a>
+      <a type="button" href="https://www.dona-trade.com/app/" class="btn btn-dark btn-lg w-100 fw-bold"><i class="bi"></i> {{ __('shop/login.download') }}</a>
     </div>
   </div>
 @endsection

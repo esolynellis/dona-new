@@ -105,4 +105,6 @@ return [
     'pagination' => ':first - :last / Нийт :total (Нийт :last_page хуудас)',
     'showing_page'         => 'Showing 1-:per_page of :total products',
     'pagination' => 'Show :first - :last / Total :total (Total :last_page Pages)',
+    'importing' => 'Импорт хийгдэж байна...',
+    'import_failed' => 'Импорт амжилтгүй',
 ];

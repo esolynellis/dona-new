@@ -18,48 +18,64 @@ class GoodsSyncService
     {
         try {
             // 获取有效的商品数据
-            $goodsList = HuipiGoods::where('delete_time', '0')
-                ->where('status', '1')
-                ->whereIn('goods_id', $goodsIds)
+            $goodsList = HuipiGoods::whereIn('goods_id', $goodsIds)
+//                ->where('delete_time', '0')
+//                ->where('status', '1')
                 ->get();
 
             if ($goodsList->isEmpty()) {
                 return [
                     'code' => 0,
-                    'msg' => '未找到有效的商品数据。',
+                    'msg' => '选择的商品已被删除。',
                     'data' => []
                 ];
             }
             $updateCount = 0;
             $insertCount = 0;
             $results = [];
-
+            $delet_goods = [];
             foreach ($goodsList as $goods) {
-                $syncResult = $this->syncSingleGoods($goods);
+                if($goods['status']==1){
+                    $syncResult = $this->syncSingleGoods($goods);
 
-                if ($syncResult['success']) {
-                    if ($syncResult['type'] === 'insert') {
-                        $insertCount++;
-                    } else {
-                        $updateCount++;
+                    if ($syncResult['success']) {
+                        if ($syncResult['type'] === 'insert') {
+                            $insertCount++;
+                        } else {
+                            $updateCount++;
+                        }
                     }
+                    $results[] = $syncResult;
+                }else{
+                    $delet_goods[]= $goods['goods_id'];
                 }
-
-                $results[] = $syncResult;
             }
 
             $totalSynced = $updateCount + $insertCount;
+            if(empty($delet_goods)){
+                return [
+                    'code' => 1,
+                    'msg' => "成功同步 {$totalSynced} 条商品数据，其中更新 {$updateCount} 条，插入 {$insertCount} 条",
+                    'data' => [
+                        'total' => $totalSynced,
+                        'inserted' => $insertCount,
+                        'updated' => $updateCount,
+                        'details' => $results
+                    ]
+                ];
+            }else{
+                return [
+                    'code' => 1,
+                    'msg' => "成功同步 {$totalSynced} 条商品数据，其中更新 {$updateCount} 条，插入 {$insertCount} 条,已删除的商品【".implode(',',$delet_goods)."】未同步。",
+                    'data' => [
+                        'total' => $totalSynced,
+                        'inserted' => $insertCount,
+                        'updated' => $updateCount,
+                        'details' => $results
+                    ]
+                ];
+            }
 
-            return [
-                'code' => 1,
-                'msg' => "成功同步 {$totalSynced} 条商品数据，其中更新 {$updateCount} 条，插入 {$insertCount} 条",
-                'data' => [
-                    'total' => $totalSynced,
-                    'inserted' => $insertCount,
-                    'updated' => $updateCount,
-                    'details' => $results
-                ]
-            ];
 
         } catch (\Exception $e) {
             Log::error('商品同步失败: ' . $e->getMessage(), [
@@ -113,6 +129,7 @@ class GoodsSyncService
                 'gunit_max' => 'gunit_max_des',
                 'gunit_midd' => 'gunit_midd_des',
                 'gunit_min' => 'gunit_min_des',
+                'unit_min' => 'min_purchasing_unit_des',
                 'goods_name' => 'name'
             ];
 
@@ -135,8 +152,8 @@ class GoodsSyncService
             if ($goods->cash_price_small != $existingProduct->cash_price_small) {
                 ProductSku::where('product_id', $existingProduct->id)
                     ->update([
-                        'price' => round($goods->cash_price_small, 2),
-                        'origin_price' => round($goods->cash_price_small, 2),
+//                        'price' => round($goods->cash_price_small, 2),
+                        'origin_price' => round($goods->cash_price_small*2, 2),
                         'cost_price' => round($goods->cash_price_small, 2),
                     ]);
             }
@@ -185,7 +202,7 @@ class GoodsSyncService
                 'model' => 'default',
                 'sku' => $goods->goods_id,
                 'price' => round($goods->cash_price_small, 2),
-                'origin_price' => round($goods->cash_price_small, 2),
+                'origin_price' => round($goods->cash_price_small*2, 2),
                 'cost_price' => round($goods->cash_price_small, 2),
                 'quantity' => 999999,
                 'is_default' => true,
@@ -205,10 +222,7 @@ class GoodsSyncService
                 'gunit_max_des' => $goods->gunit_max,
                 'gunit_midd_des' => $goods->gunit_midd,
                 'gunit_min_des' => $goods->gunit_min,
-                'gunit_max_need' => 1,
-                'gunit_midd_need' => 1,
-                'gunit_min_need' => 1,
-                'name_need' => 1,
+                'min_purchasing_unit_des' => $goods->unit_min,
                 'content' => '',
             ]);
             DB::commit();
@@ -293,7 +307,7 @@ class GoodsSyncService
             'images' => [$goods->goods_image],
             'price' => 0,
             'video' => '',
-            'active' => 1,
+            'active' => $goods->status,
             'variables' => [],
             'goods_code' => $goods->goods_code ?? '',
             'gunit_max' => $goods->gunit_max ?? '',
@@ -306,7 +320,7 @@ class GoodsSyncService
             'cash_price_small' => $this->cleanNumericValue($goods->cash_price_small),
             'goods_mall_category' => $this->cleanIntegerValue($goods->goods_mall_category),
             'goods_name' => $goods->goods_name ?? '',
-            'min_purchasing_unit' => $goods->gunit_min ?? '个', // 使用最小单位作为采购单位
+            'min_purchasing_unit' => $goods->unit_min ?? '个', // 使用最小销售单位作为采购单位
             'min_purchasing_price' => $this->cleanNumericValue($goods->cash_price_small),
         ];
     }

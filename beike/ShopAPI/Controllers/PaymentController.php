@@ -27,13 +27,14 @@ class PaymentController
         $customer    = current_customer();
         $order       = OrderRepo::getOrderByNumber($orderNumber, $customer);
         $invoiceData = [
-            'invoice_code' => 'DONA_INVOICE', // 从QPay获取的发票代码
+//            'invoice_code' => 'DONA_INVOICE', // 从QPay获取的发票代码
+            'invoice_code' => 'DONA_TRADE_INVOICE', // 从QPay获取的发票代码
             'sender_invoice_no' => $orderId,
             'invoice_receiver_code' => 'terminal', // 或特定客户代码
             'invoice_description' => '订单支付 - ' . $orderId,
             'sender_branch_code' => 'SALBAR1', // 可选，分支机构代码
-            'amount' => round($order->total, 2),
-            'callback_url' => route('api.payment.callback'), // 支付回调URL
+            'amount' => round($order->total*$order->currency_value, 2),
+            'callback_url' => route('api.payment.callback', ['payment_id' => $orderId]), // 支付回调URL，包含payment_id参数
         ];
         $result = $this->qpay->createSimpleInvoice($invoiceData);
         if (!$result) {
@@ -41,6 +42,7 @@ class PaymentController
         }
         //更新订单表qpay_id
         $order->qpay_id = $result['invoice_id'];
+        $order->payment_id = $orderId;
         $order->update();
         return json_encode($result,true);
     }
@@ -51,7 +53,7 @@ class PaymentController
     public function paymentCallback(Request $request)
     {
         // 记录完整的请求参数
-        \Log::channel('qpay')->info('QPay回调请求参数:', [
+        Log::channel('qpay')->info('QPay回调请求参数:', [
             'headers' => $request->headers->all(),
             'input' => $request->all(),
             'ip' => $request->ip(),
@@ -64,7 +66,14 @@ class PaymentController
 
         if ($paymentInfo && $paymentInfo['payment_status'] === 'PAID') {
             // 支付成功，更新订单状态
-            // ...
+            // 这里可以添加更新订单状态的逻辑
+            $order = Order::where('qpay_id', $paymentId)->first();
+            if(!$order){
+                $order = Order::where('payment_id', $paymentId)->first();
+            }
+            if ($order) {
+                $order->update(['status' => 'paid']);
+            }
 
             return response()->json(['success' => true]);
         }
@@ -110,7 +119,15 @@ class PaymentController
 
         if ($success) {
             // 更新订单状态为已取消
-            // ...
+            $order = Order::where('qpay_id', $paymentId)->first();
+            if(!$order){
+                $order = Order::where('payment_id', $paymentId)->first();
+            }
+            if ($order) {
+                $order->update([
+                    'status' => 'cancelled',
+                ]);
+            }
 
             return back()->with('success', '支付已取消');
         }

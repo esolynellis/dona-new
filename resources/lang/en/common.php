@@ -103,4 +103,6 @@ return [
     'text_total'           => 'Total',
     'text_loading'         => 'loading...',
     'pagination' => 'Show :first - :last / Total :total (Total :last_page Pages)',
+    'importing' => 'Importing...',
+    'import_failed' => 'Import failed',
 ];

@@ -192,9 +192,9 @@ class CheckoutService
                 throw new \Exception(trans('shop/carts.invalid_payment_method'));
             }
         }
-        if($totals[0]['amount']<1000){
-            throw new \Exception(trans('shop/carts.amount_too_small'));
-        }
+        // if($totals[0]['amount']<1000){
+        //     throw new \Exception(trans('shop/carts.amount_too_small'));
+        // }
 
         hook_action('service.checkout.validate_confirm.after', $checkoutData);
     }

@@ -27,6 +27,7 @@ return [
     'goods_code'                => 'Product barcode',
     'cash_price_small'             => 'Naked cash price (minimum unit)',
     'cash_price_big'             => 'Naked cash price (maximum unit)',
+    'min_purchasing_unit'             => 'Minimum purchasing unit',
     'active'            => 'Listing',
     'inactive'          => 'Removal',
     'has_been_inactive' => 'The product has been removed from the shelves',

@@ -1,0 +1,21 @@
+@charset "UTF-8";
+
+/**
+ * @copyright     2023 beikeshop.com - All Rights Reserved.
+ * @link          https://beikeshop.com
+ * @Author        pu shuo <pushuo@guangda.work>
+ * @Date          2023-12-04 13:52:45
+ * @LastEditTime  2023-12-04 13:52:53
+ */
+
+.module-icons {
+  .image-item {
+    border: 1px solid #eaeaea;
+    overflow: hidden;
+    border-radius: 6px;
+    padding: 20px;
+    &:hover {
+      border-color: $primary;
+    }
+  }
+}

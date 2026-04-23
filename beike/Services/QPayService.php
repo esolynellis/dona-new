@@ -18,9 +18,13 @@ class QPayService
 //        $this->username = config('qpay.username');
 //        $this->password = config('qpay.password');
 
+        // $this->baseUrl = 'https://merchant.qpay.mn';
+        // $this->username = 'DONA';
+        // $this->password = '4xeHZfOt';
         $this->baseUrl = 'https://merchant.qpay.mn';
-        $this->username = 'DONA';
-        $this->password = '4xeHZfOt';
+        $this->username = 'DONA_TRADE';
+        $this->password = 'LxxqLnPL';
+        
 
         // 获取访问令牌
         $this->token = $this->getAccessToken();

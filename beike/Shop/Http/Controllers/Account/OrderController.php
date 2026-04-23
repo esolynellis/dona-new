@@ -34,6 +34,11 @@ class OrderController extends Controller
             'status'   => $request->get('status'),
         ];
         $orders = OrderRepo::filterOrders($filters);
+        foreach ($orders as $order){
+            foreach ($order['orderProducts'] as &$v){
+                $v['name'] = ProductDescription::query()->where(['product_id'=>$v['product_id'],'locale'=>locale()])->value('name');
+            }
+        }
         $data   = [
             'orders' => OrderSimpleList::collection($orders),
         ];

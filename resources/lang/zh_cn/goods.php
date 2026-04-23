@@ -27,6 +27,7 @@ return [
     'goods_code'                => '商品条码',
     'cash_price_small'             => '现金裸价（最小单位）',
     'cash_price_big'             => '现金裸价（最大单位）',
+    'min_purchasing_unit'             => '最小采购单位',
     'active'            => '上架',
     'inactive'          => '下架',
     'has_been_inactive' => '该商品已下架',

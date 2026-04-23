@@ -55,7 +55,7 @@ Route::prefix($adminName)
                 Route::middleware('can:brands_create')->post('brands', [Controllers\BrandController::class, 'store'])->name('brands.store');
                 Route::middleware('can:brands_update')->put('brands/{brand}', [Controllers\BrandController::class, 'update'])->name('brands.update');
                 Route::middleware('can:brands_delete')->delete('brands/{brand}', [Controllers\BrandController::class, 'destroy'])->name('brands.destroy');
-                
+
                 // 慧批商品品牌
                 Route::middleware('can:huipi_brands_index')->get('huipi_brands', [Controllers\HuipiBrandController::class, 'index'])->name('huipi_brands.index');
                 // 慧批商品分类
@@ -65,8 +65,6 @@ Route::prefix($adminName)
                 Route::middleware('can:huipi_goods_batchSync')->post('huipi_goods/batchSync', [Controllers\HuipiGoodsController::class, 'batchSync'])->name('huipi_goods.batchSync');
                 // 慧批商品供应商
                 Route::middleware('can:huipi_categorys_index')->get('huipi_categorys', [Controllers\HuipiCategoryController::class, 'index'])->name('huipi_categorys.index');
-                
-
                 // 商品分类
                 Route::middleware('can:categories_index')->get('categories/autocomplete', [Controllers\CategoryController::class, 'autocomplete'])->name('categories.autocomplete');
                 Route::middleware('can:categories_show')->get('categories/{category}/name', [Controllers\CategoryController::class, 'name'])->name('categories.name');
@@ -256,6 +254,13 @@ Route::prefix($adminName)
                 Route::middleware('can:products_show')->get('products/{product}/edit', [Controllers\ProductController::class, 'edit'])->name('products.edit');
                 Route::middleware('can:products_update')->put('products/{product}', [Controllers\ProductController::class, 'update'])->name('products.update');
                 Route::middleware('can:products_delete')->delete('products/{product}', [Controllers\ProductController::class, 'destroy'])->name('products.destroy');
+                Route::middleware('can:products_batch')->post('products/batch_store', [Controllers\ProductController::class, 'batch_store'])->name('products.batch_store');
+                Route::middleware('can:products_batch')->get('products/batch_template', [Controllers\ProductController::class, 'batch_template'])->name('products.batch_template');
+                // ============ 添加导出导入路由 ============
+                Route::middleware('can:products_export')->post('products/export_translations', [Controllers\ProductController::class, 'exportTranslations'])->name('products.export_translations');
+                Route::middleware('can:products_import')->post('products/import_translations', [Controllers\ProductController::class, 'importTranslations'])->name('products.import_translations');
+                Route::middleware('can:products_import')->get('products/download_template', [Controllers\ProductController::class, 'downloadTemplate'])->name('products.download_template');
+                // ============ 导出导入路由结束 ============
 
                 // 翻译
                 Route::post('translation', [Controllers\TranslationController::class, 'translateText'])->name('translation.translate');

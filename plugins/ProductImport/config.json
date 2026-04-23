@@ -1,0 +1,18 @@
+{
+    "code": "product_import",
+    "name": {
+        "zh_cn": "商品批量导入",
+        "en": "Product Batch Import"
+    },
+    "description": {
+        "zh_cn": "提供商品的批量导入和导出功能",
+        "en": "You can import or export products in batches "
+    },
+    "type": "feature",
+    "version": "v1.6.1",
+    "icon": "/image/logo.png",
+    "author": {
+        "name": "成都光大网络科技有限公司",
+        "email": "mengwb@guangda.work"
+    }
+}

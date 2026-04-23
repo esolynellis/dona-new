@@ -2,7 +2,7 @@
 
     <div class="mt-1 auto-translation-wrap">
       <div class="auto-translation-info d-flex align-items-center">
-        <span style="width: 40px">{{ __('LangPackGenerator::common.auto_translation') }}：</span>
+        <span style="width: 70px">{{ __('LangPackGenerator::common.auto_translation') }}：</span>
 
         <select class="form-select form-select-sm w-auto from-locale-code" >
           @foreach (locales() as $locale)
