@@ -4,4 +4,5 @@
 !framework
 !logs
 !upload
-!.gitignore
+!installed
+!
