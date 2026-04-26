@@ -14,96 +14,194 @@
     <link rel="stylesheet" href="{{ asset('vendor/video/video-js.min.css') }}">
   @endif
   <style>
+    /* ── Similar & Relations wrapper ── */
     .similar-wrap, .relations-wrap {
-      background: #f7f8fa;
-      padding: 40px 0 50px;
-      border-top: 3px solid #f0f0f0;
+      background: linear-gradient(160deg, #fff8f5 0%, #fff3ee 40%, #fdf6ff 100%);
+      padding: 56px 0 64px;
+      border-top: 1px solid #ffe5d8;
+      position: relative;
+      overflow: hidden;
     }
+    .similar-wrap::before, .relations-wrap::before {
+      content: '';
+      position: absolute;
+      top: -80px; right: -80px;
+      width: 320px; height: 320px;
+      background: radial-gradient(circle, rgba(253,86,15,0.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .similar-wrap::after, .relations-wrap::after {
+      content: '';
+      position: absolute;
+      bottom: -60px; left: -60px;
+      width: 260px; height: 260px;
+      background: radial-gradient(circle, rgba(255,140,66,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* ── Section header ── */
     .similar-wrap .section-header, .relations-wrap .section-header {
       text-align: center;
-      margin-bottom: 32px;
+      margin-bottom: 40px;
     }
     .similar-wrap .section-header .section-title, .relations-wrap .section-header .section-title {
-      display: inline-block;
-      font-size: 1.4rem;
-      font-weight: 800;
-      color: #1a1a1a;
-      letter-spacing: 0.5px;
-      padding-bottom: 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #fd560f 0%, #ff8c42 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 0.3px;
       position: relative;
+      padding-bottom: 14px;
+    }
+    .similar-wrap .section-header .section-title::before,
+    .relations-wrap .section-header .section-title::before {
+      content: '✦';
+      font-size: 1rem;
+      background: linear-gradient(135deg, #fd560f, #ff8c42);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
     .similar-wrap .section-header .section-title::after, .relations-wrap .section-header .section-title::after {
       content: '';
       position: absolute;
-      bottom: 0;
-      left: 50%;
+      bottom: 0; left: 50%;
       transform: translateX(-50%);
-      width: 50px;
-      height: 3px;
+      width: 60px; height: 3px;
       background: linear-gradient(90deg, #fd560f, #ff8c42);
-      border-radius: 2px;
+      border-radius: 99px;
     }
+
+    /* ── Product card ── */
     .similar-wrap .product-wrap, .relations-wrap .product-wrap {
-      border-radius: 10px;
+      border-radius: 18px;
       overflow: hidden;
       background: #fff;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-      transition: box-shadow 0.25s, transform 0.25s;
+      border: 1px solid rgba(253,86,15,0.08);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06), 0 1px 4px rgba(253,86,15,0.04);
+      transition: box-shadow 0.3s ease, transform 0.3s ease, border-color 0.3s ease;
+      position: relative;
     }
     @media (min-width: 768px) {
       .similar-wrap .product-wrap:hover, .relations-wrap .product-wrap:hover {
-        box-shadow: 0 8px 28px rgba(0,0,0,0.14) !important;
-        transform: translateY(-3px);
+        box-shadow: 0 16px 48px rgba(253,86,15,0.16), 0 4px 12px rgba(0,0,0,0.08);
+        transform: translateY(-6px);
+        border-color: rgba(253,86,15,0.2);
       }
     }
+
+    /* ── Product image ── */
     .similar-wrap .product-wrap .image, .relations-wrap .product-wrap .image {
       aspect-ratio: 1 / 1;
       overflow: hidden;
       margin-bottom: 0;
-      background: #f5f5f5;
+      background: linear-gradient(135deg, #fafafa, #f5f5f5);
+      position: relative;
     }
     .similar-wrap .product-wrap .image .image-old, .relations-wrap .product-wrap .image .image-old {
-      width: 100%;
-      height: 100%;
+      width: 100%; height: 100%;
     }
     .similar-wrap .product-wrap .image img, .relations-wrap .product-wrap .image img {
-      width: 100%;
-      height: 100%;
+      width: 100%; height: 100%;
       object-fit: cover;
-      transition: transform 0.35s ease;
+      transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
     .similar-wrap .product-wrap:hover .image img, .relations-wrap .product-wrap:hover .image img {
-      transform: scale(1.06);
+      transform: scale(1.08);
     }
+
+    /* hover overlay on image */
+    .similar-wrap .product-wrap .image::after, .relations-wrap .product-wrap .image::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 50%, rgba(253,86,15,0.08) 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+    .similar-wrap .product-wrap:hover .image::after, .relations-wrap .product-wrap:hover .image::after {
+      opacity: 1;
+    }
+
+    /* ── Product info ── */
     .similar-wrap .product-wrap .product-bottom-info, .relations-wrap .product-wrap .product-bottom-info {
-      padding: 10px 10px 12px;
+      padding: 12px 14px 16px;
+      border-top: 1px solid #f8f0ec;
     }
     .similar-wrap .product-wrap .product-name, .relations-wrap .product-wrap .product-name {
       font-size: 0.82rem;
+      font-weight: 600;
+      color: #2d2d2d;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 6px;
     }
+    .similar-wrap .product-wrap .price-new, .relations-wrap .product-wrap .price-new {
+      font-weight: 800;
+      font-size: 0.95rem;
+      color: #fd560f;
+    }
+    .similar-wrap .product-wrap .price-old, .relations-wrap .product-wrap .price-old {
+      font-size: 0.75rem;
+      color: #aaa;
+      text-decoration: line-through;
+      margin-left: 4px;
+    }
+
+    /* ── Action buttons ── */
+    .similar-wrap .product-wrap .button-wrap, .relations-wrap .product-wrap .button-wrap {
+      background: transparent;
+    }
+    .similar-wrap .product-wrap .btn-add-cart, .relations-wrap .product-wrap .btn-add-cart {
+      background: linear-gradient(135deg, #fd560f, #ff7c35) !important;
+      border: none !important;
+      border-radius: 8px !important;
+      font-size: 0.75rem !important;
+      font-weight: 700 !important;
+      letter-spacing: 0.3px;
+    }
+
+    /* ── Swiper nav ── */
     .similar-wrap .swiper-button-prev, .similar-wrap .swiper-button-next,
     .relations-wrap .swiper-button-prev, .relations-wrap .swiper-button-next {
-      width: 38px;
-      height: 38px;
-      background: rgba(255,255,255,0.97);
+      width: 42px; height: 42px;
+      background: #fff;
       border-radius: 50%;
-      box-shadow: 0 3px 12px rgba(0,0,0,0.18);
-      color: #333;
+      box-shadow: 0 4px 16px rgba(253,86,15,0.18), 0 1px 4px rgba(0,0,0,0.08);
+      border: 1.5px solid rgba(253,86,15,0.15);
+      transition: background 0.2s, box-shadow 0.2s, border-color 0.2s;
+    }
+    .similar-wrap .swiper-button-prev:hover, .similar-wrap .swiper-button-next:hover,
+    .relations-wrap .swiper-button-prev:hover, .relations-wrap .swiper-button-next:hover {
+      background: linear-gradient(135deg, #fd560f, #ff8c42);
+      border-color: transparent;
     }
     .similar-wrap .swiper-button-prev::after, .similar-wrap .swiper-button-next::after,
     .relations-wrap .swiper-button-prev::after, .relations-wrap .swiper-button-next::after {
-      font-size: 13px;
-      font-weight: 900;
-      color: #333;
+      font-size: 13px; font-weight: 900; color: #fd560f;
+    }
+    .similar-wrap .swiper-button-prev:hover::after, .similar-wrap .swiper-button-next:hover::after,
+    .relations-wrap .swiper-button-prev:hover::after, .relations-wrap .swiper-button-next:hover::after {
+      color: #fff;
+    }
+    .similar-wrap .swiper-pagination-bullet, .relations-wrap .swiper-pagination-bullet {
+      background: #ddd; opacity: 1;
+      transition: background 0.2s, width 0.2s;
+      border-radius: 99px;
     }
     .similar-wrap .swiper-pagination-bullet-active, .relations-wrap .swiper-pagination-bullet-active {
-      background: #fd560f;
-    }
-    .similar-wrap .section-header .section-title, .relations-wrap .section-header .section-title {
-      font-family: 'Nunito', sans-serif;
-      font-size: 1.5rem;
-      font-weight: 800;
-      letter-spacing: 0.5px;
+      background: linear-gradient(90deg, #fd560f, #ff8c42);
+      width: 20px;
     }
   </style>
   <link rel="preconnect" href="https://fonts.googleapis.com">
