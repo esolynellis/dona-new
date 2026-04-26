@@ -37,4 +37,8 @@ return [
         'password' => env('QPAY_PASSWORD'),
     ],
 
+    'anthropic' => [
+        'key' => env('ANTHROPIC_API_KEY', ''),
+    ],
+
 ];

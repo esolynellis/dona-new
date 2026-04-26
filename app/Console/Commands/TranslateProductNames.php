@@ -20,7 +20,7 @@ class TranslateProductNames extends Command
 
     public function handle(): int
     {
-        $apiKey = env('ANTHROPIC_API_KEY', '');
+        $apiKey = config('services.anthropic.key', '');
         $batchSize = (int) $this->option('batch');
         $offset    = (int) $this->option('offset');
         $limit     = (int) $this->option('limit');
