@@ -33,15 +33,14 @@ class TranslateProductNames extends Command
 
         $query = DB::table('product_descriptions')
             ->where('locale', 'mn')
-            ->orderBy('product_id')
-            ->offset($offset);
+            ->orderBy('product_id');
 
         if ($productIds) {
             $query->whereIn('product_id', $productIds);
         }
 
         if ($limit > 0) {
-            $query->limit($limit);
+            $query->limit($limit)->skip($offset);
         }
 
         $total = (clone $query)->count();
