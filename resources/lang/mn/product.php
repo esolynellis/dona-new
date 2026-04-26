@@ -32,4 +32,5 @@ return [
     'spec'             => 'Тодорхойлолт',
     'quality'             => 'хадгалах хугацаа',
     'min_purchase'             => 'МОК',
+    'similar_products'  => 'Ижил төстэй бараа',
 ];

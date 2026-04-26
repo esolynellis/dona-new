@@ -13,6 +13,101 @@
     <script src="{{ asset('vendor/video/video.min.js') }}"></script>
     <link rel="stylesheet" href="{{ asset('vendor/video/video-js.min.css') }}">
   @endif
+  <style>
+    .similar-wrap, .relations-wrap {
+      background: #f7f8fa;
+      padding: 40px 0 50px;
+      border-top: 3px solid #f0f0f0;
+    }
+    .similar-wrap .section-header, .relations-wrap .section-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .similar-wrap .section-header .section-title, .relations-wrap .section-header .section-title {
+      display: inline-block;
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #1a1a1a;
+      letter-spacing: 0.5px;
+      padding-bottom: 10px;
+      position: relative;
+    }
+    .similar-wrap .section-header .section-title::after, .relations-wrap .section-header .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 50px;
+      height: 3px;
+      background: linear-gradient(90deg, #fd560f, #ff8c42);
+      border-radius: 2px;
+    }
+    .similar-wrap .product-wrap, .relations-wrap .product-wrap {
+      border-radius: 10px;
+      overflow: hidden;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      transition: box-shadow 0.25s, transform 0.25s;
+    }
+    @media (min-width: 768px) {
+      .similar-wrap .product-wrap:hover, .relations-wrap .product-wrap:hover {
+        box-shadow: 0 8px 28px rgba(0,0,0,0.14) !important;
+        transform: translateY(-3px);
+      }
+    }
+    .similar-wrap .product-wrap .image, .relations-wrap .product-wrap .image {
+      aspect-ratio: 1 / 1;
+      overflow: hidden;
+      margin-bottom: 0;
+      background: #f5f5f5;
+    }
+    .similar-wrap .product-wrap .image .image-old, .relations-wrap .product-wrap .image .image-old {
+      width: 100%;
+      height: 100%;
+    }
+    .similar-wrap .product-wrap .image img, .relations-wrap .product-wrap .image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.35s ease;
+    }
+    .similar-wrap .product-wrap:hover .image img, .relations-wrap .product-wrap:hover .image img {
+      transform: scale(1.06);
+    }
+    .similar-wrap .product-wrap .product-bottom-info, .relations-wrap .product-wrap .product-bottom-info {
+      padding: 10px 10px 12px;
+    }
+    .similar-wrap .product-wrap .product-name, .relations-wrap .product-wrap .product-name {
+      font-size: 0.82rem;
+    }
+    .similar-wrap .swiper-button-prev, .similar-wrap .swiper-button-next,
+    .relations-wrap .swiper-button-prev, .relations-wrap .swiper-button-next {
+      width: 38px;
+      height: 38px;
+      background: rgba(255,255,255,0.97);
+      border-radius: 50%;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.18);
+      color: #333;
+    }
+    .similar-wrap .swiper-button-prev::after, .similar-wrap .swiper-button-next::after,
+    .relations-wrap .swiper-button-prev::after, .relations-wrap .swiper-button-next::after {
+      font-size: 13px;
+      font-weight: 900;
+      color: #333;
+    }
+    .similar-wrap .swiper-pagination-bullet-active, .relations-wrap .swiper-pagination-bullet-active {
+      background: #fd560f;
+    }
+    .similar-wrap .section-header .section-title, .relations-wrap .section-header .section-title {
+      font-family: 'Nunito', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
 @endpush
 
 @php
@@ -213,17 +308,17 @@
     </div>
 
     <div class="product-description product-mb-block {{ $iframeClass }}">
-      <div class="nav nav-tabs nav-overflow justify-content-start justify-content-md-center border-bottom mb-3">
-        <a class="nav-link fw-bold active fs-5" data-bs-toggle="tab" href="#product-description">
-          {{ __('shop/products.product_details') }}
-        </a>
-        @if ($product['attributes'])
+      @if ($product['attributes'])
+        <div class="nav nav-tabs nav-overflow justify-content-start justify-content-md-center border-bottom mb-3">
+          <a class="nav-link fw-bold active fs-5" data-bs-toggle="tab" href="#product-description">
+            {{ __('shop/products.product_details') }}
+          </a>
           <a class="nav-link fw-bold fs-5" data-bs-toggle="tab" href="#product-attributes">
             {{ __('admin/attribute.index') }}
           </a>
-        @endif
-        @hook('product.tab.after.link')
-      </div>
+          @hook('product.tab.after.link')
+        </div>
+      @endif
       <div class="tab-content">
         <div class="tab-pane fade show active" id="product-description" role="tabpanel">
           {!! $product['description'] !!}
@@ -251,9 +346,11 @@
   </div>
 
   @if ($relations && !request('iframe'))
-    <div class="relations-wrap mt-2 mt-md-5 product-mb-block">
+    <div class="relations-wrap product-mb-block">
       <div class="container position-relative">
-        <div class="title text-center">{{ __('admin/product.product_relations') }}</div>
+        <div class="section-header">
+          <span class="section-title">{{ __('admin/product.product_relations') }}</span>
+        </div>
         <div class="product swiper-style-plus">
           <div class="swiper relations-swiper">
             <div class="swiper-wrapper">
@@ -264,9 +361,33 @@
               @endforeach
             </div>
           </div>
-          <div class="swiper-pagination relations-pagination"></div>
+          <div class="swiper-pagination relations-pagination mt-4"></div>
           <div class="swiper-button-prev relations-swiper-prev"></div>
           <div class="swiper-button-next relations-swiper-next"></div>
+        </div>
+      </div>
+    </div>
+  @endif
+
+  @if (!empty($similar) && !request('iframe'))
+    <div class="similar-wrap product-mb-block">
+      <div class="container position-relative">
+        <div class="section-header">
+          <span class="section-title">{{ __('product.similar_products') }}</span>
+        </div>
+        <div class="product swiper-style-plus">
+          <div class="swiper similar-swiper">
+            <div class="swiper-wrapper">
+              @foreach ($similar as $item)
+                <div class="swiper-slide">
+                  @include('shared.product', ['product' => $item])
+                </div>
+              @endforeach
+            </div>
+          </div>
+          <div class="swiper-pagination similar-pagination mt-4"></div>
+          <div class="swiper-button-prev similar-swiper-prev"></div>
+          <div class="swiper-button-next similar-swiper-next"></div>
         </div>
       </div>
     </div>
@@ -497,27 +618,38 @@
 
     var relationsSwiper = new Swiper ('.relations-swiper', {
       watchSlidesProgress: true,
-      autoHeight: true,
-      breakpoints:{
-        320: {
-          slidesPerView: 2,
-          spaceBetween: 10,
-        },
-        768: {
-          slidesPerView: 4,
-          spaceBetween: 30,
-        },
+      autoplay: { delay: 3500, disableOnInteraction: false, pauseOnMouseEnter: true },
+      breakpoints: {
+        320:  { slidesPerView: 2, spaceBetween: 10 },
+        576:  { slidesPerView: 3, spaceBetween: 14 },
+        768:  { slidesPerView: 4, spaceBetween: 16 },
+        1200: { slidesPerView: 5, spaceBetween: 18 },
       },
-      spaceBetween: 30,
-      // 如果需要前进后退按钮
       navigation: {
         nextEl: '.relations-swiper-next',
         prevEl: '.relations-swiper-prev',
       },
-
-      // 如果需要分页器
       pagination: {
         el: '.relations-pagination',
+        clickable: true,
+      },
+    })
+
+    var similarSwiper = new Swiper ('.similar-swiper', {
+      watchSlidesProgress: true,
+      autoplay: { delay: 3500, disableOnInteraction: false, pauseOnMouseEnter: true },
+      breakpoints: {
+        320:  { slidesPerView: 2, spaceBetween: 10 },
+        576:  { slidesPerView: 3, spaceBetween: 14 },
+        768:  { slidesPerView: 4, spaceBetween: 16 },
+        1200: { slidesPerView: 5, spaceBetween: 18 },
+      },
+      navigation: {
+        nextEl: '.similar-swiper-next',
+        prevEl: '.similar-swiper-prev',
+      },
+      pagination: {
+        el: '.similar-pagination',
         clickable: true,
       },
     })

@@ -82,6 +82,64 @@ class ProductRepo
     }
 
     /**
+     * Ижил төстэй бараануудыг олох
+     * (нэг ангилалд багтсан болон/эсвэл ижил брэндтэй бараануудыг буцаана)
+     *
+     * @param Product $product
+     * @param int     $limit
+     * @return AnonymousResourceCollection
+     * @throws \Exception
+     */
+    public static function getSimilarProducts(Product $product, int $limit = 12): AnonymousResourceCollection
+    {
+        $categoryIds = $product->categories()->pluck('categories.id')->toArray();
+
+        $builder = Product::query()
+            ->with(['description', 'skus', 'masterSku', 'brand', 'inCurrentWishlist'])
+            ->whereHas('masterSku')
+            ->where('products.active', true)
+            ->where('products.id', '<>', $product->id);
+
+        $builder->leftJoin('product_descriptions as pd', function ($build) {
+            $build->whereColumn('pd.product_id', 'products.id')
+                ->where('locale', locale());
+        })->select(['products.*', 'pd.name', 'pd.content', 'pd.meta_title', 'pd.meta_description', 'pd.meta_keywords']);
+
+        if (! empty($categoryIds)) {
+            $builder->whereHas('categories', function ($query) use ($categoryIds) {
+                $query->whereIn('categories.id', $categoryIds);
+            });
+        } elseif ($product->brand_id) {
+            $builder->where('products.brand_id', $product->brand_id);
+        }
+
+        $products = $builder->inRandomOrder()->limit($limit)->get();
+
+        // Хэрэв ижил ангилалд хангалттай бараа олдоогүй бол брэндээр нэмж авна
+        if ($products->count() < $limit && $product->brand_id) {
+            $existingIds = $products->pluck('id')->toArray();
+            $existingIds[] = $product->id;
+
+            $extraBuilder = Product::query()
+                ->with(['description', 'skus', 'masterSku', 'brand', 'inCurrentWishlist'])
+                ->whereHas('masterSku')
+                ->where('products.active', true)
+                ->where('products.brand_id', $product->brand_id)
+                ->whereNotIn('products.id', $existingIds);
+
+            $extraBuilder->leftJoin('product_descriptions as pd', function ($build) {
+                $build->whereColumn('pd.product_id', 'products.id')
+                    ->where('locale', locale());
+            })->select(['products.*', 'pd.name', 'pd.content', 'pd.meta_title', 'pd.meta_description', 'pd.meta_keywords']);
+
+            $extra = $extraBuilder->inRandomOrder()->limit($limit - $products->count())->get();
+            $products = $products->merge($extra);
+        }
+
+        return ProductSimple::collection($products);
+    }
+
+    /**
      * 获取商品筛选对象
      *
      * @param array $filters

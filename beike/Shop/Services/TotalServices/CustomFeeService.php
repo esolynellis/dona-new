@@ -24,7 +24,7 @@ class CustomFeeService
             [
                 'code'        => 'transport_fee',
                 'title'       => 'Тээвэр',
-                'description' => 'Хятадаас Монгол хүртэлх тээвэр — нэг машины ачааны үнэ',
+                'description' => 'Хятадын үйлдвэрүүдээс Эрээн хотод ирэх тээвэрлэлтийн үнэ',
                 'icon_type'   => 'transport',
                 'amount'      => self::TRANSPORT_FEE,
             ],

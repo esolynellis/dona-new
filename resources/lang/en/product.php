@@ -32,4 +32,5 @@ return [
     'spec'             => 'Spec',
     'quality'             => 'Quality',
     'min_purchase'             => 'MOQ',
+    'similar_products'  => 'Similar products',
 ];

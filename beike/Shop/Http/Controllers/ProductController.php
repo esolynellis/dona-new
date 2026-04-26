@@ -25,6 +25,7 @@ class ProductController extends Controller
         $data        = [
             'product'   => (new ProductDetail($product))->jsonSerialize(),
             'relations' => ProductRepo::getProductsByIds($relationIds)->jsonSerialize(),
+            'similar'   => ProductRepo::getSimilarProducts($product, 12)->jsonSerialize(),
         ];
         $gunit_text = '';
         if($data['product']['gunit_max']){
