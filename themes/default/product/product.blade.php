@@ -195,7 +195,8 @@
       color: #fff;
     }
     .similar-wrap .similar-pagination, .relations-wrap .relations-pagination {
-      margin-top: 28px !important;
+      margin-top: 48px !important;
+      padding-bottom: 8px;
     }
     .similar-wrap .swiper-pagination-bullet, .relations-wrap .swiper-pagination-bullet {
       background: #ddd; opacity: 1;
