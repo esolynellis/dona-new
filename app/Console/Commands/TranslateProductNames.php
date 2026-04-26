@@ -16,11 +16,11 @@ class TranslateProductNames extends Command
 
     protected $description = 'Translate product names to natural Mongolian using Claude API';
 
-    private string $apiKey = env('ANTHROPIC_API_KEY', '');
-    private string $model  = 'claude-haiku-4-5-20251001';
+    private string $model = 'claude-haiku-4-5-20251001';
 
     public function handle(): int
     {
+        $apiKey = env('ANTHROPIC_API_KEY', '');
         $batchSize = (int) $this->option('batch');
         $offset    = (int) $this->option('offset');
         $limit     = (int) $this->option('limit');
@@ -53,7 +53,7 @@ class TranslateProductNames extends Command
         foreach ($products->chunk($batchSize) as $batch) {
             $names = $batch->pluck('name', 'id')->toArray();
 
-            $translated = $this->translateBatch($client, $names);
+            $translated = $this->translateBatch($client, $names, $apiKey);
 
             if ($translated === null) {
                 $failed += count($names);
@@ -87,7 +87,7 @@ class TranslateProductNames extends Command
         return 0;
     }
 
-    private function translateBatch(Client $client, array $idToName): ?array
+    private function translateBatch(Client $client, array $idToName, string $apiKey): ?array
     {
         $lines = [];
         foreach ($idToName as $id => $name) {
@@ -109,7 +109,7 @@ PROMPT;
         try {
             $resp = $client->post('https://api.anthropic.com/v1/messages', [
                 'headers' => [
-                    'x-api-key'         => $this->apiKey,
+                    'x-api-key'         => $apiKey,
                     'anthropic-version' => '2023-06-01',
                     'content-type'      => 'application/json',
                 ],
