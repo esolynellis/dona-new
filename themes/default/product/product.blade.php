@@ -194,6 +194,9 @@
     .relations-wrap .swiper-button-prev:hover::after, .relations-wrap .swiper-button-next:hover::after {
       color: #fff;
     }
+    .similar-wrap .similar-pagination, .relations-wrap .relations-pagination {
+      margin-top: 28px !important;
+    }
     .similar-wrap .swiper-pagination-bullet, .relations-wrap .swiper-pagination-bullet {
       background: #ddd; opacity: 1;
       transition: background 0.2s, width 0.2s;
