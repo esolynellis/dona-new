@@ -73,11 +73,17 @@ class TranslateProductNames extends Command
 
             foreach ($batch as $row) {
                 $newName = $translated[$row->id] ?? null;
+                $newName = $newName ? mb_substr($newName, 0, 255) : null;
                 if ($newName && $newName !== $row->name) {
                     if (!$dryRun) {
-                        DB::table('product_descriptions')
-                            ->where('id', $row->id)
-                            ->update(['name' => $newName]);
+                        try {
+                            DB::table('product_descriptions')
+                                ->where('id', $row->id)
+                                ->update(['name' => $newName]);
+                        } catch (\Throwable $e) {
+                            $this->warn("\nDB error id={$row->id}: " . $e->getMessage());
+                            continue;
+                        }
                     } else {
                         $this->line("\n  [#{$row->product_id}] {$row->name}  →  {$newName}");
                     }
