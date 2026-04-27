@@ -86,8 +86,8 @@ class TranslateProductNames extends Command
                 $bar->advance();
             }
 
-            // Avoid rate limits
-            usleep(300_000);
+            // Avoid rate limits (2s between batches)
+            sleep(2);
         }
 
         $bar->finish();
@@ -134,40 +134,54 @@ class TranslateProductNames extends Command
 {$input}
 PROMPT;
 
-        try {
-            $resp = $client->post('https://api.anthropic.com/v1/messages', [
-                'headers' => [
-                    'x-api-key'         => $apiKey,
-                    'anthropic-version' => '2023-06-01',
-                    'content-type'      => 'application/json',
-                ],
-                'json' => [
-                    'model'      => $this->model,
-                    'max_tokens' => 4096,
-                    'messages'   => [
-                        ['role' => 'user', 'content' => $prompt],
+        $attempts = 0;
+        while ($attempts < 4) {
+            $attempts++;
+            try {
+                $resp = $client->post('https://api.anthropic.com/v1/messages', [
+                    'headers' => [
+                        'x-api-key'         => $apiKey,
+                        'anthropic-version' => '2023-06-01',
+                        'content-type'      => 'application/json',
                     ],
-                ],
-            ]);
+                    'json' => [
+                        'model'      => $this->model,
+                        'max_tokens' => 4096,
+                        'messages'   => [
+                            ['role' => 'user', 'content' => $prompt],
+                        ],
+                    ],
+                ]);
 
-            $body   = json_decode((string) $resp->getBody(), true);
-            $text   = $body['content'][0]['text'] ?? '';
-            $result = [];
+                $body   = json_decode((string) $resp->getBody(), true);
+                $text   = $body['content'][0]['text'] ?? '';
+                $result = [];
 
-            foreach (explode("\n", trim($text)) as $line) {
-                $line = trim($line);
-                if (!str_contains($line, '|')) continue;
-                [$id, $name] = explode('|', $line, 2);
-                $id = (int) trim($id);
-                if ($id > 0) {
-                    $result[$id] = trim($name);
+                foreach (explode("\n", trim($text)) as $line) {
+                    $line = trim($line);
+                    if (!str_contains($line, '|')) continue;
+                    [$id, $name] = explode('|', $line, 2);
+                    $id = (int) trim($id);
+                    if ($id > 0) {
+                        $result[$id] = trim($name);
+                    }
                 }
-            }
 
-            return $result;
-        } catch (\Throwable $e) {
-            $this->error("\nAPI error: " . $e->getMessage());
-            return null;
+                return $result;
+            } catch (\GuzzleHttp\Exception\ClientException $e) {
+                if ($e->getResponse()->getStatusCode() === 429 && $attempts < 4) {
+                    $wait = $attempts * 30;
+                    $this->warn("\n429 rate limit — waiting {$wait}s (attempt {$attempts}/4)");
+                    sleep($wait);
+                    continue;
+                }
+                $this->error("\nAPI error: " . $e->getMessage());
+                return null;
+            } catch (\Throwable $e) {
+                $this->error("\nAPI error: " . $e->getMessage());
+                return null;
+            }
         }
+        return null;
     }
 }
