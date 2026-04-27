@@ -13,6 +13,7 @@ class TranslateProductNames extends Command
                             {--offset=0 : Start from this offset}
                             {--limit=0 : Max products to translate (0 = all)}
                             {--product-ids= : Comma-separated product_ids to translate}
+                            {--newest : Order by newest product_id first}
                             {--dry-run : Preview without saving}';
 
     protected $description = 'Translate product names to natural Mongolian using Claude API';
@@ -26,6 +27,7 @@ class TranslateProductNames extends Command
         $offset    = (int) $this->option('offset');
         $limit     = (int) $this->option('limit');
         $dryRun    = $this->option('dry-run');
+        $newest    = $this->option('newest');
 
         $productIds = $this->option('product-ids')
             ? array_map('intval', explode(',', $this->option('product-ids')))
@@ -33,7 +35,7 @@ class TranslateProductNames extends Command
 
         $query = DB::table('product_descriptions')
             ->where('locale', 'mn')
-            ->orderBy('product_id');
+            ->orderBy('product_id', $newest ? 'desc' : 'asc');
 
         if ($productIds) {
             $query->whereIn('product_id', $productIds);
