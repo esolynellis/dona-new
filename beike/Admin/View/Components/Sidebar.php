@@ -438,6 +438,7 @@ class Sidebar extends Component
             ['route' => 'design.index', 'prefixes' => ['design'], 'blank' => true, 'hide_mobile' => true],
             ['route' => 'design_footer.index', 'prefixes' => ['design_footer'], 'blank' => true, 'hide_mobile' => true],
             ['route' => 'design_app_home.index', 'prefixes' => ['design_app_home'], 'blank' => false, 'hide_mobile' => true],
+            ['route' => 'theme.index', 'url' => '/app-preview.php?key=dona2025', 'prefixes' => [], 'blank' => true, 'title' => '📱 App Preview', 'hide_mobile' => true],
         ];
 
         return hook_filter('admin.sidebar.design_routes', $routes);
