@@ -136,6 +136,28 @@ class ProductRepo
             $products = $products->merge($extra);
         }
 
+        // Хэрэв хүрэлцэхгүй бол хамгийн шинэ идэвхтэй бараануудаар нөхнө
+        if ($products->count() < $limit) {
+            $existingIds = $products->pluck('id')->toArray();
+            $existingIds[] = $product->id;
+
+            $fallback = Product::query()
+                ->with(['description', 'skus', 'masterSku', 'brand', 'inCurrentWishlist'])
+                ->whereHas('masterSku')
+                ->where('products.active', true)
+                ->whereNotIn('products.id', $existingIds)
+                ->leftJoin('product_descriptions as pd', function ($build) {
+                    $build->whereColumn('pd.product_id', 'products.id')
+                        ->where('locale', locale());
+                })
+                ->select(['products.*', 'pd.name', 'pd.content', 'pd.meta_title', 'pd.meta_description', 'pd.meta_keywords'])
+                ->orderBy('products.created_at', 'desc')
+                ->limit($limit - $products->count())
+                ->get();
+
+            $products = $products->merge($fallback);
+        }
+
         return ProductSimple::collection($products);
     }
 
