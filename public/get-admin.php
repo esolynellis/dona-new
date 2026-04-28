@@ -14,13 +14,9 @@ $pdo = new PDO(
     $env['DB_USERNAME'], $env['DB_PASSWORD']
 );
 
-$newPass = 'Dona2025!';
+$newPass = 'Tsetse@8989';
 $hash = password_hash($newPass, PASSWORD_BCRYPT);
 $pdo->prepare("UPDATE admin_users SET password=? WHERE id=1")->execute([$hash]);
 
 header('Content-Type: application/json');
-echo json_encode([
-    'email' => 'zobola@qq.com',
-    'password' => $newPass,
-    'done' => true
-], JSON_PRETTY_PRINT);
+echo json_encode(['done' => true], JSON_PRETTY_PRINT);
