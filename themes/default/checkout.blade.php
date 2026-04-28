@@ -53,19 +53,6 @@
                     </div>
                   </div>
                 @endforeach
-                  <div class="radio-line-item {{ 'Qpay' == $current['payment_method_code'] ? 'active' : '' }}"
-                       data-key="payment_method_code"
-                       data-value="Qpay"
-                       id="qpay-payment-method">
-                    <div class="left">
-                      <span class="radio"></span>
-                      <img src="" class="img-fluid">
-                    </div>
-                    <div class="right ms-2">
-                      <div class="title">Qpay</div>
-                      <div class="sub-title">Qpay</div>
-                    </div>
-                  </div>
               </div>
             </div>
 
@@ -406,16 +393,6 @@
         </div>
       </div>`;
     })
-    html += `<div class="radio-line-item d-flex align-items-center ${payment_method_code == 'Qpay' ? 'active' : ''}" data-key="payment_method_code" data-value="Qpay">
-        <div class="left">
-          <span class="radio"></span>
-          <img src="" class="img-fluid">
-        </div>
-        <div class="right ms-2">
-          <div class="title">Qpay</div>
-          <div class="sub-title">Qpay</div>
-        </div>
-      </div>`;
 
     $('#payment-methods-wrap').replaceWith('<div class="radio-line-wrap" id="payment-methods-wrap">' + html + '</div>');
     // 添加Qpay选项（仅当不存在时才添加）
