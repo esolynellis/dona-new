@@ -17,21 +17,45 @@ $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 $results = [];
 
-// 1. Check payment-related tables
-if (isset($_GET['inspect'])) {
-    $tables = $pdo->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
-    $payTables = array_filter($tables, fn($t) => stripos($t, 'pay') !== false || stripos($t, 'plugin') !== false || stripos($t, 'offline') !== false);
-    echo json_encode(['tables' => array_values($payTables)], JSON_PRETTY_PRINT);
-    exit;
+// 1. Enable l_offline plugin
+$pdo->prepare("UPDATE settings SET value='1' WHERE space='l_offline' AND name='status'")->execute();
+$results['l_offline_enabled'] = true;
+
+// 2. Check offline_payment_config_descriptions
+$descs = $pdo->query("SELECT * FROM offline_payment_config_descriptions LIMIT 5")->fetchAll(PDO::FETCH_ASSOC);
+$results['current_descriptions'] = $descs;
+
+// 3. Check plugins table for QPay
+$plugins = $pdo->query("SELECT * FROM plugins WHERE code LIKE '%pay%' OR code LIKE '%qpay%'")->fetchAll(PDO::FETCH_ASSOC);
+$results['pay_plugins'] = $plugins;
+
+// 4. Check all payment-related settings
+$allPaySettings = $pdo->query("SELECT * FROM settings WHERE space LIKE '%pay%' OR space LIKE '%qpay%'")->fetchAll(PDO::FETCH_ASSOC);
+$results['all_pay_settings'] = $allPaySettings;
+
+// 5. Set bank account in offline payment descriptions
+$locales = ['mn', 'zh_cn', 'en', 'ru'];
+$bankInfo = "Банкны данс: MN720005005129104667\nЗахиалга өгсний дараа дансанд мөнгө шилжүүлж, гүйлгээний баримтыг илгээнэ үү.";
+
+foreach ($locales as $locale) {
+    $existing = $pdo->prepare("SELECT id FROM offline_payment_config_descriptions WHERE locale=? LIMIT 1");
+    $existing->execute([$locale]);
+    $row = $existing->fetch(PDO::FETCH_ASSOC);
+
+    if ($row) {
+        $pdo->prepare("UPDATE offline_payment_config_descriptions SET description=?, name='Банкны шилжүүлэг' WHERE id=?")
+            ->execute([$bankInfo, $row['id']]);
+        $results['desc_' . $locale] = 'updated';
+    } else {
+        $pdo->prepare("INSERT INTO offline_payment_config_descriptions (locale, name, description) VALUES (?, 'Банкны шилжүүлэг', ?)")
+            ->execute([$locale, $bankInfo]);
+        $results['desc_' . $locale] = 'inserted';
+    }
 }
 
-// 2. Disable QPay - find and disable in settings
-$qpayRows = $pdo->query("SELECT * FROM settings WHERE name LIKE '%qpay%' OR space LIKE '%qpay%' LIMIT 5")->fetchAll(PDO::FETCH_ASSOC);
-$results['qpay_settings'] = $qpayRows;
-
-// 3. Check plugin_settings or similar
-$pluginRows = $pdo->query("SELECT * FROM settings WHERE name='status' AND (space LIKE '%pay%' OR space LIKE '%offline%') LIMIT 10")->fetchAll(PDO::FETCH_ASSOC);
-$results['plugin_payment_status'] = $pluginRows;
+// Clear cache
+foreach (glob("$root/storage/framework/views/*.php") as $f) { @unlink($f); }
+foreach (glob("$root/bootstrap/cache/*.php") as $f) { @unlink($f); }
 
 header('Content-Type: application/json');
 echo json_encode($results, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
