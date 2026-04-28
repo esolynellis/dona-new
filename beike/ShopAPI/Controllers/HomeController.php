@@ -14,6 +14,7 @@ namespace Beike\ShopAPI\Controllers;
 use App\Http\Controllers\Controller;
 use Beike\Services\DesignService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
 {
@@ -27,10 +28,32 @@ class HomeController extends Controller
 
         $productCodes = ['product', 'category', 'latest'];
         $moduleItems  = [];
+        $productModuleIndex = 0;
+
         foreach ($modules as $module) {
             $code    = $module['code'];
             $content = $module['content'];
-            if (in_array($code, $productCodes)) {
+
+            if ($code === 'product') {
+                // Always fetch newest active products dynamically — no stale IDs
+                $offset = $productModuleIndex * 8;
+                $ids = DB::table('products as p')
+                    ->join('product_descriptions as pd', 'p.id', '=', 'pd.product_id')
+                    ->whereNull('p.deleted_at')
+                    ->where('p.active', 1)
+                    ->where('pd.locale', 'mn')
+                    ->where('pd.name', '!=', '')
+                    ->whereNotNull('p.images')
+                    ->where('p.images', '!=', '[]')
+                    ->orderBy('p.created_at', 'desc')
+                    ->offset($offset)
+                    ->limit(8)
+                    ->pluck('p.id')
+                    ->toArray();
+
+                $content['products'] = $ids;
+                $productModuleIndex++;
+            } elseif (in_array($code, $productCodes)) {
                 $content['products'] = collect($content['products'])->pluck('id')->toArray();
             }
 
