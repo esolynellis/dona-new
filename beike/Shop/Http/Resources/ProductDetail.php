@@ -92,6 +92,9 @@ class ProductDetail extends JsonResource
             'skus'             => SkuDetail::collection($this->skus)->jsonSerialize(),
             'in_wishlist'      => $this->inCurrentWishlist->id ?? 0,
             'active'           => (bool) $this->active,
+            'similar'          => ProductSimple::collection(
+                ProductRepo::getSimilarProducts($this->resource, 8)
+            )->jsonSerialize(),
         ];
 
         return hook_filter('resource.product.detail', $data);
