@@ -16,51 +16,29 @@ $pdo = new PDO(
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $results = [];
 
-// 1. Enable l_offline
-$pdo->prepare("UPDATE settings SET value='1' WHERE space='l_offline' AND name='status'")->execute();
-$results['l_offline_enabled'] = true;
-
-// 2. Disable QPay in plugins table
-$qpay = $pdo->query("SELECT * FROM plugins WHERE code LIKE '%qpay%' OR code LIKE '%QPay%'")->fetchAll(PDO::FETCH_ASSOC);
-$results['qpay_plugins'] = $qpay;
-if ($qpay) {
-    $pdo->query("UPDATE plugins SET status=0 WHERE code LIKE '%qpay%' OR code LIKE '%QPay%'");
-    $results['qpay_disabled'] = true;
-}
-
-// Also disable in settings
-$pdo->query("UPDATE settings SET value='0' WHERE space LIKE '%qpay%' AND name='status'");
-
-// 3. Set bank account content for all locales
-$bankInfo = "Банкны данс: MN720005005129104667\nЗахиалга өгсний дараа дансанд мөнгө шилжүүлж, гүйлгээний баримтыг илгээнэ үү.";
-
-foreach (['mn', 'zh_cn', 'en', 'ru'] as $locale) {
-    $existing = $pdo->prepare("SELECT id FROM offline_payment_config_descriptions WHERE locale=? LIMIT 1");
-    $existing->execute([$locale]);
-    $row = $existing->fetch(PDO::FETCH_ASSOC);
-
-    if ($row) {
-        $pdo->prepare("UPDATE offline_payment_config_descriptions SET content=? WHERE id=?")
-            ->execute([$bankInfo, $row['id']]);
-        $results['content_' . $locale] = 'updated';
+// Fix plugin name in settings - all locales
+foreach (['mn','zh_cn','en','ru'] as $locale) {
+    $check = $pdo->prepare("SELECT id FROM settings WHERE space='l_offline' AND name='name_".$locale."' LIMIT 1");
+    $check->execute();
+    if ($check->fetch()) {
+        $pdo->prepare("UPDATE settings SET value='Банкны шилжүүлэг' WHERE space='l_offline' AND name='name_".$locale."'")->execute();
     } else {
-        $pdo->prepare("INSERT INTO offline_payment_config_descriptions (locale, content) VALUES (?, ?)")
-            ->execute([$locale, $bankInfo]);
-        $results['content_' . $locale] = 'inserted';
+        $pdo->prepare("INSERT INTO settings (type,space,name,value,json) VALUES ('plugin','l_offline',?,?,0)")
+            ->execute(['name_'.$locale, 'Банкны шилжүүлэг']);
     }
 }
 
-// 4. Set name for l_offline in settings
-$nameExists = $pdo->prepare("SELECT id FROM settings WHERE space='l_offline' AND name='name' LIMIT 1");
-$nameExists->execute();
-if ($nameExists->fetch()) {
-    $pdo->prepare("UPDATE settings SET value='Банкны шилжүүлэг' WHERE space='l_offline' AND name='name'")->execute();
-} else {
-    $pdo->prepare("INSERT INTO settings (type,space,name,value,json) VALUES ('plugin','l_offline','name','Банкны шилжүүлэг',0)")->execute();
-}
-$results['name_set'] = true;
+// Also update plugins table name if exists
+$pdo->query("UPDATE plugins SET name='Банкны шилжүүлэг' WHERE code='l_offline'")->execute();
+$results['name_updated'] = true;
 
-// Clear cache
+// Check what columns plugins table has
+$cols = $pdo->query("DESCRIBE plugins")->fetchAll(PDO::FETCH_COLUMN);
+$results['plugins_columns'] = $cols;
+
+$pluginRow = $pdo->query("SELECT * FROM plugins WHERE code='l_offline' LIMIT 1")->fetchAll(PDO::FETCH_ASSOC);
+$results['l_offline_plugin_row'] = $pluginRow;
+
 foreach (glob("$root/storage/framework/views/*.php") as $f) { @unlink($f); }
 foreach (glob("$root/bootstrap/cache/*.php") as $f) { @unlink($f); }
 
