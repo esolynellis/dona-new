@@ -16,7 +16,7 @@ $pdo = new PDO(
 $tables = $pdo->query("SHOW TABLES LIKE '%admin%'")->fetchAll(PDO::FETCH_COLUMN);
 $rows = [];
 foreach ($tables as $t) {
-    $rows[$t] = $pdo->query("SELECT id, name, email, password FROM `$t` LIMIT 3")->fetchAll(PDO::FETCH_ASSOC);
+    $rows[$t] = $pdo->query("SELECT * FROM `$t` LIMIT 3")->fetchAll(PDO::FETCH_ASSOC);
 }
 header('Content-Type: application/json');
 echo json_encode($rows, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
