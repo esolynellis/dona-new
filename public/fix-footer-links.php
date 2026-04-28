@@ -21,20 +21,16 @@ $stmt = $pdo->prepare("SELECT id, value FROM settings WHERE space='base' AND nam
 $stmt->execute();
 $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-if (!$row) {
-    echo json_encode(['error' => 'footer_setting not found']);
-    exit;
-}
+if (!$row) { echo json_encode(['error' => 'not found']); exit; }
 
 $data = json_decode($row['value'], true);
 $replaced = 0;
 
-// Custom links store URL in 'value', not 'link'
 foreach (['link1','link2','link3'] as $linkKey) {
     if (!isset($data['content'][$linkKey]['links'])) continue;
     foreach ($data['content'][$linkKey]['links'] as &$item) {
-        if (($item['type'] ?? '') === 'custom' && isset($item['value']) && strpos($item['value'], 'gitbook.io') !== false) {
-            $item['value'] = '/app/';
+        if (($item['type'] ?? '') === 'custom' && isset($item['value']) && strpos($item['value'], '/app/') !== false) {
+            $item['value'] = 'https://www.dona-trade.com/app/';
             $replaced++;
         }
     }
