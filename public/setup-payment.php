@@ -16,27 +16,34 @@ $pdo = new PDO(
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $results = [];
 
-// Fix plugin name in settings - all locales
+// 1. Patch config.json
+$configPath = "$root/plugins/LOffline/config.json";
+$config = json_decode(file_get_contents($configPath), true);
+$config['name'] = [
+    'mn'    => 'Банкны шилжүүлэг',
+    'zh_cn' => 'Банкны шилжүүлэг',
+    'en'    => 'Банкны шилжүүлэг',
+    'ru'    => 'Банкны шилжүүлэг',
+];
+@unlink($configPath);
+file_put_contents($configPath, json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+$results['config_updated'] = true;
+
+// 2. Make sure bank info is set correctly
+$bankInfo = "Банкны данс: MN720005005129104667\nЗахиалга өгсний дараа дансанд мөнгө шилжүүлж, гүйлгээний баримтыг илгээнэ үү.";
 foreach (['mn','zh_cn','en','ru'] as $locale) {
-    $check = $pdo->prepare("SELECT id FROM settings WHERE space='l_offline' AND name='name_".$locale."' LIMIT 1");
-    $check->execute();
-    if ($check->fetch()) {
-        $pdo->prepare("UPDATE settings SET value='Банкны шилжүүлэг' WHERE space='l_offline' AND name='name_".$locale."'")->execute();
+    $check = $pdo->prepare("SELECT id FROM offline_payment_config_descriptions WHERE locale=? LIMIT 1");
+    $check->execute([$locale]);
+    $row = $check->fetch(PDO::FETCH_ASSOC);
+    if ($row) {
+        $pdo->prepare("UPDATE offline_payment_config_descriptions SET content=? WHERE id=?")->execute([$bankInfo, $row['id']]);
     } else {
-        $pdo->prepare("INSERT INTO settings (type,space,name,value,json) VALUES ('plugin','l_offline',?,?,0)")
-            ->execute(['name_'.$locale, 'Банкны шилжүүлэг']);
+        $pdo->prepare("INSERT INTO offline_payment_config_descriptions (locale,content) VALUES (?,?)")->execute([$locale, $bankInfo]);
     }
+    $results['content_'.$locale] = 'ok';
 }
 
-$results['name_updated'] = true;
-
-// Check what columns plugins table has
-$cols = $pdo->query("DESCRIBE plugins")->fetchAll(PDO::FETCH_COLUMN);
-$results['plugins_columns'] = $cols;
-
-$pluginRow = $pdo->query("SELECT * FROM plugins WHERE code='l_offline' LIMIT 1")->fetchAll(PDO::FETCH_ASSOC);
-$results['l_offline_plugin_row'] = $pluginRow;
-
+// 3. Clear cache
 foreach (glob("$root/storage/framework/views/*.php") as $f) { @unlink($f); }
 foreach (glob("$root/bootstrap/cache/*.php") as $f) { @unlink($f); }
 

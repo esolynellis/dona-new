@@ -1,12 +1,16 @@
 {
     "code": "l_offline",
     "name": {
-        "zh_cn": "线下支付",
-        "en": "Offline Payment"
+        "mn": "Банкны шилжүүлэг",
+        "zh_cn": "银行转账",
+        "en": "Bank Transfer",
+        "ru": "Банковский перевод"
     },
     "description": {
+        "mn": "",
         "zh_cn": "",
-        "en": ""
+        "en": "",
+        "ru": ""
     },
     "type": "payment",
     "version": "v1.0.1",
