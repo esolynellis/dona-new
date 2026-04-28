@@ -1,10 +1,13 @@
 <?php
 if (($_GET['key'] ?? '') !== 'dona2025') { http_response_code(403); die(); }
 
-$target = __DIR__ . '/../app/Http/Middleware/SetLocaleShopApi.php';
+$target = '/www/wwwroot/dona-new/app/Http/Middleware/SetLocaleShopApi.php';
 
-$content = <<<'PHP'
-<?php
+// Try to fix permissions first
+@chmod($target, 0644);
+$chmodOut = shell_exec("chmod 666 {$target} 2>&1");
+
+$content = '<?php
 namespace App\Http\Middleware;
 
 use Closure;
@@ -15,40 +18,40 @@ class SetLocaleShopApi
 {
     public function handle(Request $request, Closure $next): mixed
     {
-        $locale = $request->header('locale');
+        $locale = $request->header(\'locale\');
         if (empty($locale)) {
-            $locale = $request->get('locale');
+            $locale = $request->get(\'locale\');
         }
-        $locale = $locale ?? 'mn';
+        $locale = $locale ?? \'mn\';
 
-        // This shop is Mongolia-only: treat Chinese locale as Mongolian
-        if ($locale === 'zh_cn' || $locale === 'zh_hk') {
-            $locale = 'mn';
+        // Mongolia-only shop: override Chinese locale to Mongolian
+        if ($locale === \'zh_cn\' || $locale === \'zh_hk\') {
+            $locale = \'mn\';
         }
 
         $languages = languages()->toArray();
-        register('locale', $locale);
+        register(\'locale\', $locale);
         if (in_array($locale, $languages)) {
             App::setLocale($locale);
         } else {
-            App::setLocale('mn');
+            App::setLocale(\'mn\');
         }
 
         return $next($request);
     }
 }
-PHP;
+';
 
 $result = file_put_contents($target, $content);
 
-// Clear bootstrap cache
-foreach (glob(__DIR__ . '/../bootstrap/cache/*.php') as $f) {
+foreach (glob('/www/wwwroot/dona-new/bootstrap/cache/*.php') as $f) {
     @unlink($f);
 }
 
 header('Content-Type: application/json');
 echo json_encode([
-    'success' => $result !== false,
-    'bytes'   => $result,
-    'writable' => is_writable($target),
+    'chmod_output' => $chmodOut,
+    'writable'     => is_writable($target),
+    'write_result' => $result,
+    'success'      => $result !== false,
 ], JSON_PRETTY_PRINT);
