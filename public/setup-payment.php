@@ -28,8 +28,6 @@ foreach (['mn','zh_cn','en','ru'] as $locale) {
     }
 }
 
-// Also update plugins table name if exists
-$pdo->query("UPDATE plugins SET name='Банкны шилжүүлэг' WHERE code='l_offline'")->execute();
 $results['name_updated'] = true;
 
 // Check what columns plugins table has
