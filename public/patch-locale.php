@@ -3,10 +3,6 @@ if (($_GET['key'] ?? '') !== 'dona2025') { http_response_code(403); die(); }
 
 $target = '/www/wwwroot/dona-new/app/Http/Middleware/SetLocaleShopApi.php';
 
-// Try to fix permissions first
-@chmod($target, 0644);
-$chmodOut = shell_exec("chmod 666 {$target} 2>&1");
-
 $content = '<?php
 namespace App\Http\Middleware;
 
@@ -24,7 +20,7 @@ class SetLocaleShopApi
         }
         $locale = $locale ?? \'mn\';
 
-        // Mongolia-only shop: override Chinese locale to Mongolian
+        // Mongolia-only shop: treat Chinese locale as Mongolian
         if ($locale === \'zh_cn\' || $locale === \'zh_hk\') {
             $locale = \'mn\';
         }
@@ -42,16 +38,16 @@ class SetLocaleShopApi
 }
 ';
 
-$result = file_put_contents($target, $content);
+// Directory is writable — unlink old file, write new one
+$unlinkOk = @unlink($target);
+$writeOk  = file_put_contents($target, $content);
 
-foreach (glob('/www/wwwroot/dona-new/bootstrap/cache/*.php') as $f) {
-    @unlink($f);
-}
+// Clear caches
+foreach (glob('/www/wwwroot/dona-new/bootstrap/cache/*.php') as $f) { @unlink($f); }
 
 header('Content-Type: application/json');
 echo json_encode([
-    'chmod_output' => $chmodOut,
-    'writable'     => is_writable($target),
-    'write_result' => $result,
-    'success'      => $result !== false,
+    'unlink' => $unlinkOk,
+    'write'  => $writeOk !== false,
+    'bytes'  => $writeOk,
 ], JSON_PRETTY_PRINT);
