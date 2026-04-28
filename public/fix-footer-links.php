@@ -17,19 +17,35 @@ $pdo = new PDO(
 );
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-// Discover table structure
-if (isset($_GET['inspect'])) {
-    $cols = $pdo->query("DESCRIBE settings")->fetchAll(PDO::FETCH_ASSOC);
-    $sample = $pdo->query("SELECT * FROM settings LIMIT 3")->fetchAll(PDO::FETCH_ASSOC);
-    echo json_encode(['columns' => $cols, 'sample' => $sample], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+$stmt = $pdo->prepare("SELECT id, value FROM settings WHERE space='base' AND name='footer_setting' LIMIT 1");
+$stmt->execute();
+$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$row) {
+    echo json_encode(['error' => 'footer_setting not found']);
     exit;
 }
 
-// Find footer_setting row
-$rows = $pdo->query("SELECT * FROM settings WHERE name LIKE '%footer%' OR value LIKE '%gitbook%' LIMIT 5")->fetchAll(PDO::FETCH_ASSOC);
-if (empty($rows)) {
-    echo json_encode(['error' => 'no footer rows found', 'hint' => 'add &inspect=1 to see table structure']);
-    exit;
+$data = json_decode($row['value'], true);
+
+$replaced = 0;
+foreach (['link1','link2','link3'] as $linkKey) {
+    if (!isset($data['content'][$linkKey]['links'])) continue;
+    foreach ($data['content'][$linkKey]['links'] as &$item) {
+        if (isset($item['link']) && strpos($item['link'], 'gitbook.io') !== false) {
+            $item['link'] = '/app/';
+            $replaced++;
+        }
+    }
+    unset($item);
 }
 
-echo json_encode(['found' => count($rows), 'rows' => array_map(fn($r) => array_diff_key($r, ['value'=>1]), $rows)], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+$newValue = json_encode($data, JSON_UNESCAPED_UNICODE);
+$upd = $pdo->prepare("UPDATE settings SET value=? WHERE id=?");
+$upd->execute([$newValue, $row['id']]);
+
+foreach (glob("$root/storage/framework/views/*.php") as $f) { @unlink($f); }
+foreach (glob("$root/bootstrap/cache/*.php") as $f) { @unlink($f); }
+
+header('Content-Type: application/json');
+echo json_encode(['replaced' => $replaced, 'done' => true], JSON_PRETTY_PRINT);
