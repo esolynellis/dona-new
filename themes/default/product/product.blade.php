@@ -14,6 +14,30 @@
     <link rel="stylesheet" href="{{ asset('vendor/video/video-js.min.css') }}">
   @endif
   <style>
+    /* ── Mobile back button ── */
+    .mobile-back-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #fff;
+      padding: 10px 16px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .mobile-back-btn {
+      background: none;
+      border: none;
+      font-size: 15px;
+      color: #333;
+      padding: 4px 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .mobile-back-btn i { font-size: 18px; }
+
+    /* ── Product image skeleton ── */
+    .product-main-img { min-height: 200px; background: #f5f5f5; }
+
     /* ── Similar & Relations wrapper ── */
     .similar-wrap, .relations-wrap {
       background: linear-gradient(160deg, #fff8f5 0%, #fff3ee 40%, #fdf6ff 100%);
@@ -221,7 +245,15 @@
 
 @section('content')
   @if (!request('iframe'))
-    <x-shop-breadcrumb type="product" :value="$product['id']" />
+    @if(is_mobile())
+      <div class="mobile-back-bar d-lg-none">
+        <button onclick="history.length > 1 ? history.back() : (window.location='/')" class="mobile-back-btn">
+          <i class="bi bi-arrow-left"></i> Буцах
+        </button>
+      </div>
+    @else
+      <x-shop-breadcrumb type="product" :value="$product['id']" />
+    @endif
   @endif
 
   <div class="container {{ request('iframe') ? 'pt-4' : '' }}" id="product-app" v-cloak>
@@ -252,8 +284,9 @@
             @include('product.product-video')
             <div class="swiper" id="swiper-mobile">
               <div class="swiper-wrapper">
-                <div class="swiper-slide d-flex align-items-center justify-content-center" v-for="image, index in images" :key="index">
-                  <img :src="image.preview" class="img-fluid">
+                <div class="swiper-slide d-flex align-items-center justify-content-center" v-for="(image, index) in images" :key="index">
+                  <img v-if="index === 0" :src="image.preview" class="img-fluid product-main-img">
+                  <img v-else v-lazy="image.preview" :src="'{{ asset('image/placeholder.png') }}'" class="img-fluid product-main-img">
                 </div>
               </div>
               <div class="swiper-pagination mobile-pagination"></div>
