@@ -13,16 +13,20 @@ $pdo = new PDO(
     "mysql:host={$env['DB_HOST']};port={$env['DB_PORT']};dbname={$env['DB_DATABASE']};charset=utf8mb4",
     $env['DB_USERNAME'], $env['DB_PASSWORD']
 );
-$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-// Find all qpay related settings
-$rows = $pdo->query("SELECT * FROM settings WHERE space LIKE '%qpay%' OR space LIKE '%QPay%'")->fetchAll(PDO::FETCH_ASSOC);
+// Find all payment plugins on server
+$serverPlugins = glob("$root/plugins/*/config.json");
+$payPlugins = [];
+foreach ($serverPlugins as $cfg) {
+    $data = json_decode(file_get_contents($cfg), true);
+    if (($data['type'] ?? '') === 'payment') {
+        $payPlugins[] = ['code' => $data['code'], 'name' => $data['name'], 'path' => dirname($cfg)];
+    }
+}
 
-// Disable all qpay
-$pdo->query("UPDATE settings SET value='0' WHERE space LIKE '%qpay%' OR space LIKE '%QPay%'");
-
-foreach (glob("$root/storage/framework/views/*.php") as $f) { @unlink($f); }
-foreach (glob("$root/bootstrap/cache/*.php") as $f) { @unlink($f); }
+// All payment-related settings
+$allSettings = $pdo->query("SELECT * FROM settings WHERE type='plugin'")->fetchAll(PDO::FETCH_ASSOC);
+$paySettings = array_filter($allSettings, fn($r) => stripos($r['space'], 'pay') !== false || stripos($r['space'], 'qpay') !== false);
 
 header('Content-Type: application/json');
-echo json_encode(['disabled' => count($rows), 'rows' => $rows], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+echo json_encode(['server_payment_plugins' => $payPlugins, 'pay_settings' => array_values($paySettings)], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
