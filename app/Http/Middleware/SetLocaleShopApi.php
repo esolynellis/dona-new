@@ -30,7 +30,12 @@ class SetLocaleShopApi
         if (empty($locale)) {
             $locale = $request->get('locale');
         }
-        $locale = $locale ?? 'zh_cn';
+        $locale = $locale ?? 'mn';
+
+        // This shop is Mongolia-only: treat Chinese locale as Mongolian
+        if ($locale === 'zh_cn' || $locale === 'zh_hk') {
+            $locale = 'mn';
+        }
 
         $languages = languages()->toArray();
         register('locale', $locale);
