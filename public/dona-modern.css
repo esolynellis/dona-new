@@ -1,159 +1,212 @@
 /* ═══════════════════════════════════════════
-   DONA Modern UI — Light & Clean
+   DONA — Орчин үеийн, 40+ насны хэрэглэгчид
    ═══════════════════════════════════════════ */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap');
 
+/* ── Base ── */
 body {
-  font-family: 'Inter', -apple-system, sans-serif !important;
-  background: #ffffff !important;
-  color: #1e293b !important;
+  font-family: 'Noto Sans', sans-serif !important;
+  background: #f5f5f7 !important;
+  color: #111 !important;
+  font-size: 16px !important;
   -webkit-font-smoothing: antialiased;
 }
 
-/* ── Header — цагаан, цэвэр ── */
+/* ── Header ── */
 header .top-wrap {
-  background: #f8fafc !important;
-  border-bottom: 1px solid #e9ecef !important;
-  font-size: 13px;
+  background: #fff !important;
+  border-bottom: 1px solid #e5e5e5 !important;
+  font-size: 14px !important;
+  padding: 8px 0 !important;
 }
 header .top-wrap a,
-header .top-wrap .btn { color: #64748b !important; font-size: 13px; }
-header .top-wrap a:hover { color: #e63946 !important; }
+header .top-wrap .btn {
+  color: #555 !important;
+  font-size: 14px !important;
+}
 
 header .header-content {
-  background: #ffffff !important;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.06) !important;
-  position: sticky !important;
-  top: 0;
-  z-index: 999;
-  border-bottom: 1px solid #f1f5f9 !important;
-}
-header .header-mobile {
   background: #fff !important;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.06) !important;
+  border-bottom: 2px solid #e8002d !important;
   position: sticky !important;
   top: 0;
   z-index: 999;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08) !important;
+}
+header .header-content .container-fluid {
+  padding: 12px 24px !important;
+}
+header .header-content .logo img {
+  height: 48px !important;
 }
 
-/* ── Nav links ── */
+header .header-mobile {
+  background: #fff !important;
+  border-bottom: 2px solid #e8002d !important;
+  position: sticky !important;
+  top: 0;
+  z-index: 999;
+  padding: 10px 16px !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+}
+
+/* ── Nav ── */
 .navbar-nav .nav-link,
 .menu-wrap .nav-link {
-  font-weight: 500 !important;
-  font-size: 14px !important;
-  color: #334155 !important;
-  border-radius: 8px;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  color: #222 !important;
+  padding: 10px 16px !important;
+  border-radius: 6px;
   transition: all 0.2s !important;
 }
 .navbar-nav .nav-link:hover,
 .menu-wrap .nav-link:hover {
-  color: #e63946 !important;
-  background: #fff5f5 !important;
+  color: #e8002d !important;
+  background: #fff0f1 !important;
 }
 
 /* ── Product cards ── */
 .product-item,
 .goods-item {
   background: #fff !important;
-  border-radius: 14px !important;
-  border: 1px solid #f1f5f9 !important;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05) !important;
+  border-radius: 12px !important;
+  border: 1px solid #ebebeb !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important;
   overflow: hidden;
-  transition: transform 0.2s, box-shadow 0.2s !important;
+  transition: box-shadow 0.2s, transform 0.2s !important;
 }
 .product-item:hover,
 .goods-item:hover {
-  transform: translateY(-3px) !important;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.1) !important;
-  border-color: #fde8ea !important;
-}
-.product-item img,
-.goods-item img {
-  transition: transform 0.3s !important;
-}
-.product-item:hover img,
-.goods-item:hover img {
-  transform: scale(1.03) !important;
-}
-[class*="price"] {
-  color: #e63946 !important;
-  font-weight: 700 !important;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12) !important;
+  transform: translateY(-2px) !important;
 }
 
-/* ── Buttons ── */
-.btn-primary {
-  background: #e63946 !important;
-  border: none !important;
-  border-radius: 10px !important;
+/* Бараа нэр — том, тодорхой */
+.product-item .name,
+.goods-item .name,
+[class*="product-name"] {
+  font-size: 15px !important;
   font-weight: 600 !important;
-  box-shadow: 0 3px 10px rgba(230,57,70,0.25) !important;
+  color: #222 !important;
+  line-height: 1.5 !important;
+}
+
+/* Үнэ — том, тод улаан */
+[class*="price"],
+.price,
+.product-price {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  color: #e8002d !important;
+}
+
+/* ── Товчнууд ── */
+.btn {
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  padding: 12px 28px !important;
+  border-radius: 8px !important;
+  min-height: 46px !important;
+}
+.btn-primary {
+  background: #e8002d !important;
+  border-color: #e8002d !important;
+  box-shadow: 0 3px 10px rgba(232,0,45,0.25) !important;
   transition: all 0.2s !important;
 }
 .btn-primary:hover {
-  background: #c1121f !important;
-  transform: translateY(-1px) !important;
-  box-shadow: 0 5px 16px rgba(230,57,70,0.35) !important;
+  background: #c40026 !important;
+  box-shadow: 0 5px 14px rgba(232,0,45,0.35) !important;
 }
 
-/* ── Forms ── */
+/* ── Forms & Inputs — том, хялбар ── */
 .form-control, .form-select {
-  border-radius: 10px !important;
-  border: 1.5px solid #e2e8f0 !important;
-  font-size: 14px !important;
-  transition: border-color 0.2s, box-shadow 0.2s !important;
+  font-size: 15px !important;
+  padding: 12px 16px !important;
+  border-radius: 8px !important;
+  border: 1.5px solid #ddd !important;
+  min-height: 48px !important;
 }
 .form-control:focus, .form-select:focus {
-  border-color: #e63946 !important;
-  box-shadow: 0 0 0 3px rgba(230,57,70,0.08) !important;
+  border-color: #e8002d !important;
+  box-shadow: 0 0 0 3px rgba(232,0,45,0.1) !important;
 }
+label {
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  color: #333 !important;
+  margin-bottom: 6px !important;
+}
+
+/* ── Links ── */
+a { transition: color 0.2s; }
+a:hover { color: #e8002d !important; }
 
 /* ── Cards ── */
 .card {
-  border: 1px solid #f1f5f9 !important;
-  border-radius: 14px !important;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05) !important;
+  border-radius: 12px !important;
+  border: 1px solid #ebebeb !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
 }
 
-/* ── Dropdowns ── */
+/* ── Dropdown ── */
 .dropdown-menu {
-  border: 1px solid #f1f5f9 !important;
-  border-radius: 12px !important;
-  box-shadow: 0 6px 24px rgba(0,0,0,0.1) !important;
-  padding: 6px !important;
+  border-radius: 10px !important;
+  border: 1px solid #ebebeb !important;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1) !important;
+  padding: 8px !important;
+  font-size: 15px !important;
 }
 .dropdown-item {
-  border-radius: 8px !important;
-  font-size: 14px;
-  transition: background 0.15s;
+  font-size: 15px !important;
+  padding: 10px 16px !important;
+  border-radius: 6px !important;
 }
-.dropdown-item:hover { background: #fff5f5 !important; color: #e63946 !important; }
+.dropdown-item:hover {
+  background: #fff0f1 !important;
+  color: #e8002d !important;
+}
 
-/* ── Footer — цайвар ── */
-footer {
-  background: #f8fafc !important;
-  color: #64748b !important;
-  border-top: 1px solid #e9ecef !important;
-  margin-top: 40px;
+/* ── Breadcrumb ── */
+.breadcrumb { background: transparent !important; padding: 14px 0 !important; }
+.breadcrumb-item a { color: #666 !important; font-size: 14px !important; }
+.breadcrumb-item.active { color: #111 !important; font-size: 14px !important; }
+
+/* ── Section titles ── */
+.module-title, .section-title, [class*="floor-title"] {
+  font-size: 22px !important;
+  font-weight: 700 !important;
+  color: #111 !important;
+  border-left: 4px solid #e8002d;
+  padding-left: 12px !important;
+  margin-bottom: 20px !important;
 }
-footer a { color: #64748b !important; }
-footer a:hover { color: #e63946 !important; }
+
+/* ── Footer ── */
+footer {
+  background: #fff !important;
+  border-top: 2px solid #e8002d !important;
+  color: #555 !important;
+  margin-top: 48px;
+}
+footer a { color: #555 !important; font-size: 14px !important; }
+footer a:hover { color: #e8002d !important; }
 footer h5, footer h6, footer .footer-title {
-  color: #1e293b !important;
-  font-weight: 600 !important;
+  color: #111 !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
 }
 
 /* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #f8fafc; }
-::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
-
-/* ── Breadcrumb ── */
-.breadcrumb-item a { color: #64748b !important; font-size: 13px; }
-.breadcrumb-item.active { color: #1e293b !important; font-size: 13px; }
+::-webkit-scrollbar-track { background: #f5f5f7; }
+::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
 
 /* ── Mobile ── */
 @media (max-width: 991px) {
-  body { background: #f8fafc !important; }
+  body { font-size: 15px !important; background: #f5f5f7 !important; }
+  .btn { padding: 13px 24px !important; font-size: 16px !important; min-height: 50px !important; }
+  [class*="price"], .price { font-size: 17px !important; }
 }
