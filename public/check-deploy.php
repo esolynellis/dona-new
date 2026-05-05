@@ -24,5 +24,5 @@ echo json_encode([
     'resource_modified'        => date('Y-m-d H:i:s', filemtime(__DIR__ . '/../beike/Shop/Http/Resources/ProductSimple.php')),
     'last_deploy_log'          => $lastLog,
     'full_log_lines'           => file_exists($logFile) ? count(file($logFile)) : 0,
-    'recent_50'                => file_exists($logFile) ? implode('', array_slice(file($logFile), -50)) : '',
+    'recent_100'               => file_exists($logFile) ? implode('', array_slice(file($logFile), -100)) : '',
 ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
