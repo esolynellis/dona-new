@@ -7,15 +7,17 @@ $results = [];
 // 1. Check Redis
 $results['redis_extension'] = extension_loaded('redis') ? 'YES' : 'NO';
 $results['redis_connect'] = 'NO';
-try {
-    $redis = new Redis();
-    if ($redis->connect('127.0.0.1', 6379, 2)) {
-        $results['redis_connect'] = 'YES';
-        $redis->set('dona_test', 'ok', 5);
-        $results['redis_test'] = $redis->get('dona_test');
+if (extension_loaded('redis')) {
+    try {
+        $redis = new Redis();
+        if ($redis->connect('127.0.0.1', 6379, 2)) {
+            $results['redis_connect'] = 'YES';
+            $redis->set('dona_test', 'ok', 5);
+            $results['redis_test'] = $redis->get('dona_test');
+        }
+    } catch (Exception $e) {
+        $results['redis_error'] = $e->getMessage();
     }
-} catch (Exception $e) {
-    $results['redis_error'] = $e->getMessage();
 }
 
 // 2. Read .env cache driver
