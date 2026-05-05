@@ -1,5 +1,5 @@
 // DONA Service Worker — Cache static assets for offline speed
-const CACHE = 'dona-v1';
+const CACHE = 'dona-v2';
 const STATIC = [
   '/',
   '/smooth.css',
