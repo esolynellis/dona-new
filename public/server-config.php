@@ -2,36 +2,33 @@
 if (($_GET['key'] ?? '') !== 'dona2025') { http_response_code(403); die(); }
 
 $results = [];
-$vhostDir = '/www/server/panel/vhost/nginx';
 
-// 1. List vhost directory
-$handle = @opendir($vhostDir);
-$vhostFiles = [];
-if ($handle) {
+// Search all possible locations
+$searchDirs = [
+    '/www/server/nginx/conf/vhost',
+    '/www/server/panel/vhost/nginx',
+    '/www/server/nginx/conf',
+];
+
+foreach ($searchDirs as $dir) {
+    $handle = @opendir($dir);
+    if (!$handle) { $results[$dir] = 'cannot open'; continue; }
+    $files = [];
     while (($f = readdir($handle)) !== false) {
-        if ($f !== '.' && $f !== '..') $vhostFiles[] = $f;
+        if ($f === '.' || $f === '..') continue;
+        $path = "$dir/$f";
+        $c = @file_get_contents($path);
+        if ($c && (stripos($c, 'dona') !== false || stripos($c, '103.168') !== false)) {
+            $results['FOUND'] = $path;
+            $results['gzip'] = strpos($c, 'gzip on') !== false ? 'YES' : 'NO';
+            $results['expires'] = strpos($c, 'expires') !== false ? 'YES' : 'NO';
+            $results['writable'] = is_writable($path) ? 'YES' : 'NO';
+            $results['preview'] = substr($c, 0, 1500);
+        }
+        $files[] = $f;
     }
     closedir($handle);
-}
-$results['vhost_files'] = $vhostFiles;
-
-// 2. Find dona conf
-$donaConf = '';
-foreach ($vhostFiles as $f) {
-    $path = "$vhostDir/$f";
-    $c = @file_get_contents($path);
-    if ($c && (stripos($c, 'dona') !== false || stripos($c, 'dona-trade') !== false)) {
-        $donaConf = $path;
-        $results['dona_conf'] = $path;
-        $results['dona_conf_preview'] = substr($c, 0, 1000);
-        $results['gzip_already'] = strpos($c, 'gzip on') !== false;
-        $results['expires_already'] = strpos($c, 'expires') !== false;
-        break;
-    }
-}
-
-if (!$donaConf) {
-    $results['error'] = 'dona conf not found';
+    $results[$dir] = $files;
 }
 
 header('Content-Type: application/json');
