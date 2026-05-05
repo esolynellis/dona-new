@@ -18,7 +18,7 @@ $imageStyle = '<style id="dona-image-fix">
 /* ── Бүх бараа зургийг адилхан жижиг хэмжээнд оруулах ── */
 .product-wrap .image {
   width: 100% !important;
-  height: 200px !important;
+  height: 100px !important;
   position: relative !important;
   overflow: hidden !important;
   background: #f8f8f8 !important;
@@ -39,12 +39,6 @@ $imageStyle = '<style id="dona-image-fix">
   bottom: 0 !important; left: 0 !important; right: 0 !important;
   width: 100% !important;
   z-index: 10 !important;
-}
-@media (max-width: 768px) {
-  .product-wrap .image { height: 160px !important; }
-}
-@media (max-width: 480px) {
-  .product-wrap .image { height: 140px !important; }
 }
 </style>';
 
