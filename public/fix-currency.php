@@ -14,8 +14,12 @@ $pdo = new PDO(
     $env['DB_USERNAME'], $env['DB_PASSWORD']
 );
 
-$currencies = $pdo->query("SELECT * FROM currencies")->fetchAll(PDO::FETCH_ASSOC);
-$defaultCurrency = $pdo->query("SELECT * FROM settings WHERE name='default_currency' OR name='currency'")->fetchAll(PDO::FETCH_ASSOC);
+// Set default currency to MNT
+$pdo->prepare("UPDATE settings SET value='MNT' WHERE space='base' AND name='currency'")->execute();
+
+// Clear cache
+foreach (glob("$root/storage/framework/views/*.php") as $f) { @unlink($f); }
+foreach (glob("$root/bootstrap/cache/*.php") as $f) { @unlink($f); }
 
 header('Content-Type: application/json');
-echo json_encode(['currencies' => $currencies, 'default' => $defaultCurrency], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+echo json_encode(['done' => true, 'default_currency' => 'MNT', 'rate' => '1 CNY = 528 ₮'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
