@@ -19,11 +19,11 @@ $sample = $pdo->query("SELECT * FROM products LIMIT 3")->fetchAll(PDO::FETCH_ASS
 // Check if products have any goods_id-like column that links to huipi_goods
 $colNames = array_column($prodCols, 'Field');
 
-// Try to find a link via goods_name match
+// Try to find a link via goods_name match (with collation fix)
 $matchTest = $pdo->query("
     SELECT p.id, p.goods_name, hg.goods_id, hg.brand_id, hb.brand_name
     FROM products p
-    JOIN huipi_goods hg ON hg.goods_name = p.goods_name
+    JOIN huipi_goods hg ON hg.goods_name COLLATE utf8mb4_general_ci = p.goods_name COLLATE utf8mb4_general_ci
     LEFT JOIN huipi_brands hb ON hb.brand_id = hg.brand_id
     LIMIT 5
 ")->fetchAll(PDO::FETCH_ASSOC);
@@ -31,7 +31,7 @@ $matchTest = $pdo->query("
 // Count matchable products
 $matchCount = $pdo->query("
     SELECT COUNT(*) FROM products p
-    JOIN huipi_goods hg ON hg.goods_name = p.goods_name
+    JOIN huipi_goods hg ON hg.goods_name COLLATE utf8mb4_general_ci = p.goods_name COLLATE utf8mb4_general_ci
 ")->fetchColumn();
 
 // Total products
