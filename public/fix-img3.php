@@ -15,9 +15,9 @@ $pdo = new PDO(
 );
 
 $style = '<style id="dona-img2">
-.product-wrap .image .image-old{height:200px!important;max-height:200px!important;min-height:200px!important;width:100%!important;overflow:hidden!important;display:block!important;}
-.product-wrap .image .image-old a{display:block!important;height:200px!important;overflow:hidden!important;}
-.product-wrap .image .image-old img,.product-wrap .image .image-old .lazyload,.product-wrap .image .image-old .lazyloaded{width:100%!important;height:200px!important;max-height:200px!important;object-fit:cover!important;object-position:center center!important;}
+.product-wrap .image .image-old{height:300px!important;max-height:300px!important;min-height:300px!important;width:100%!important;overflow:hidden!important;display:block!important;}
+.product-wrap .image .image-old a{display:block!important;height:300px!important;overflow:hidden!important;}
+.product-wrap .image .image-old img,.product-wrap .image .image-old .lazyload,.product-wrap .image .image-old .lazyloaded{width:100%!important;height:300px!important;max-height:300px!important;object-fit:cover!important;object-position:center center!important;}
 </style>';
 
 $row = $pdo->query("SELECT id, value FROM settings WHERE space='base' AND name='head_code' LIMIT 1")->fetch(PDO::FETCH_ASSOC);
@@ -28,4 +28,4 @@ $pdo->prepare("UPDATE settings SET value=? WHERE id=?")->execute([$newValue, $ro
 foreach (glob("$root/storage/framework/views/*.php") as $f) { @unlink($f); }
 foreach (glob("$root/bootstrap/cache/*.php") as $f) { @unlink($f); }
 
-echo json_encode(['done'=>true,'height'=>'200px','ts'=>time()]);
+echo json_encode(['done'=>true,'height'=>'300px','ts'=>time()]);
