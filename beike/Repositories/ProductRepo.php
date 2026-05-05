@@ -762,6 +762,12 @@ class ProductRepo
             $builder->where('brand_id', $brandId);
         }
 
+        // Filter by brand_name text (used for brand grouping feature)
+        $brandNameFilter = $filters['brand_name'] ?? '';
+        if ($brandNameFilter) {
+            $builder->where('products.brand_name', $brandNameFilter);
+        }
+
         $productIds = $filters['product_ids'] ?? [];
         if ($productIds) {
             $builder->whereIn('products.id', $productIds);

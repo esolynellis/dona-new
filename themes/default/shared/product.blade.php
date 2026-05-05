@@ -1,4 +1,4 @@
-<div class="product-wrap {{ request('style_list') ?? '' }}">
+<div class="product-wrap {{ request('style_list') ?? '' }}" data-brand="{{ $product['brand_name'] ?? '' }}" data-product-id="{{ $product['id'] ?? '' }}">
   <div class="image">
     @hook('product_list.item.image.tag')
 

@@ -105,6 +105,7 @@ class ProductSimple extends JsonResource
             'integral'         => $this->integral ?? 0,
             'cart_num'         => $cart_num,
             'cart_id'         => $cart_id,
+            'brand_name'      => $this->brand_name ?? '',
             'images'              => array_map(function ($item) {
 //                return image_resize($item, 400, 400);
                 return $item.'?imageView2/2/w/400/h/400';

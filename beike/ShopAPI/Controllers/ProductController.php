@@ -30,7 +30,7 @@ class ProductController extends Controller
      */
     public function index(Request $request): AnonymousResourceCollection
     {
-        $filterData           = $request->only('keyword', 'attr', 'price', 'sort', 'order', 'per_page', 'category_id', 'brand_id');
+        $filterData           = $request->only('keyword', 'attr', 'price', 'sort', 'order', 'per_page', 'category_id', 'brand_id', 'brand_name');
         $filterData['active'] = 1;
         $products             = ProductRepo::getBuilderWyl($filterData)->with('inCurrentWishlist')->paginate($filterData['per_page'] ?? perPage());
 
