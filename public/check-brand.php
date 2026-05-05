@@ -16,31 +16,26 @@ $pdo = new PDO(
 
 $results = [];
 
-// 1. DB-д brand хүснэгт байгаа эсэх
 $tables = $pdo->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
-$results['all_tables'] = $tables;
-$brandTables = array_filter($tables, fn($t) => stripos($t, 'brand') !== false || stripos($t, 'maker') !== false || stripos($t, 'manufact') !== false);
-$results['brand_tables'] = array_values($brandTables);
+$results['brand_tables']  = array_values(array_filter($tables, fn($t) => stripos($t,'brand')!==false||stripos($t,'maker')!==false));
+$results['tag_tables']    = array_values(array_filter($tables, fn($t) => stripos($t,'tag')!==false));
 
-// 2. Products хүснэгтэд brand_id байгаа эсэх
+// Products columns
 $cols = $pdo->query("DESCRIBE products")->fetchAll(PDO::FETCH_ASSOC);
 $results['product_columns'] = array_column($cols, 'Field');
 
-// 3. Tags хүснэгт байгаа эсэх
-$tagTables = array_filter($tables, fn($t) => stripos($t, 'tag') !== false);
-$results['tag_tables'] = array_values($tagTables);
-
-// 4. Plugins дотор brand plugin байгаа эсэх
-$plugins = $pdo->query("SELECT code, status FROM plugins")->fetchAll(PDO::FETCH_ASSOC);
-$results['plugins'] = $plugins;
-
-// 5. Categories хүснэгтийн бүтэц
+// Categories
 $catCols = $pdo->query("DESCRIBE categories")->fetchAll(PDO::FETCH_ASSOC);
 $results['category_columns'] = array_column($catCols, 'Field');
+$results['category_count'] = $pdo->query("SELECT COUNT(*) FROM categories")->fetchColumn();
 
-// 6. Нийт category тоо
-$catCount = $pdo->query("SELECT COUNT(*) FROM categories")->fetchColumn();
-$results['category_count'] = $catCount;
+// Sample categories
+$cats = $pdo->query("SELECT id, name FROM categories LIMIT 10")->fetchAll(PDO::FETCH_ASSOC);
+$results['sample_categories'] = $cats;
+
+// Plugins columns
+$pluginCols = $pdo->query("DESCRIBE plugins")->fetchAll(PDO::FETCH_ASSOC);
+$results['plugin_columns'] = array_column($pluginCols, 'Field');
 
 header('Content-Type: application/json');
 echo json_encode($results, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
