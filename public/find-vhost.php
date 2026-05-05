@@ -44,15 +44,20 @@ foreach ($patterns as $pattern) {
     }
 }
 
-// Try finding via /proc/net or running nginx -T
-$nginxT = shell_exec('nginx -T 2>&1 | head -200');
-if ($nginxT) {
-    $results['nginx_T_partial'] = substr($nginxT, 0, 2000);
-}
-
 // Try bt panel api or config
 $btConf = @file_get_contents('/www/server/panel/config/config.json');
 if ($btConf) $results['bt_config'] = substr($btConf, 0, 500);
+
+// Try reading known vhost include paths from main nginx.conf
+$mainConf = @file_get_contents('/www/server/nginx/conf/nginx.conf');
+if ($mainConf) {
+    preg_match_all('/include\s+([^\s;]+)/m', $mainConf, $m);
+    $results['nginx_includes'] = $m[1] ?? [];
+    // Try to find dona-related entries
+    if (preg_match('/server_name[^;]*dona[^;]*;/', $mainConf, $sm)) {
+        $results['nginx_dona_server'] = $sm[0];
+    }
+}
 
 header('Content-Type: application/json');
 echo json_encode($results, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
