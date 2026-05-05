@@ -1,0 +1,135 @@
+/* ═══════════════════════════════════════════
+   DONA — Smooth & Fast UX
+   ═══════════════════════════════════════════ */
+
+/* ── Smooth scroll ── */
+html { scroll-behavior: smooth; }
+
+/* ── Page-level transitions: fade in on load ── */
+#app, .app-wrap, body > * {
+  animation: dona-fadein 0.25s ease both;
+}
+@keyframes dona-fadein {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Images: fade in instead of popping ── */
+img {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+img.loaded, img[src] {
+  opacity: 1;
+}
+/* Force show images that are already loaded */
+img:not([src=""]) {
+  animation: img-fadein 0.35s ease forwards;
+}
+@keyframes img-fadein {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Skeleton pulse for loading cards ── */
+.skeleton, [v-loading], .loading-placeholder {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-pulse 1.4s ease infinite;
+  border-radius: 8px;
+}
+@keyframes skeleton-pulse {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Product card hover: smooth & fast ── */
+.product-item, .goods-item {
+  transition: box-shadow 0.18s ease, transform 0.18s ease !important;
+  will-change: transform;
+}
+.product-item:hover, .goods-item:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.13) !important;
+}
+
+/* ── Buttons: fast feedback ── */
+.btn {
+  transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease !important;
+  will-change: transform;
+}
+.btn:active {
+  transform: scale(0.97) !important;
+}
+
+/* ── Links & nav: smooth color change ── */
+a, .nav-link, .dropdown-item {
+  transition: color 0.15s ease, background 0.15s ease !important;
+}
+
+/* ── Page router view transition (Vue) ── */
+.router-view-enter-active,
+.router-view-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.router-view-enter-from,
+.router-view-leave-to {
+  opacity: 0;
+  transform: translateX(8px);
+}
+
+/* ── Smooth sticky header shadow ── */
+header, .header-content, .header-mobile {
+  transition: box-shadow 0.2s ease !important;
+}
+
+/* ── Input/form focus transition ── */
+.form-control, .form-select {
+  transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+/* ── Modal/drawer animations ── */
+.modal.fade .modal-dialog {
+  transition: transform 0.2s ease !important;
+}
+.el-drawer {
+  transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* ── Reduce layout shift: reserve space for images ── */
+.product-item img, .goods-item img, .goods-item .image, .product-item .image {
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  width: 100%;
+  background: #f5f5f5;
+}
+
+/* ── Scrollbar: smooth thin ── */
+* { scrollbar-width: thin; scrollbar-color: #ddd transparent; }
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+
+/* ── Touch: remove 300ms tap delay ── */
+a, button, .btn, [role="button"] {
+  touch-action: manipulation;
+}
+
+/* ── Loading bar at top (for page nav) ── */
+#dona-loader {
+  position: fixed; top: 0; left: 0; z-index: 9999;
+  height: 3px; width: 0%;
+  background: linear-gradient(90deg, #e8002d, #ff6b6b);
+  transition: width 0.3s ease;
+  pointer-events: none;
+  border-radius: 0 2px 2px 0;
+}
+#dona-loader.active { width: 70%; }
+#dona-loader.done   { width: 100%; opacity: 0; transition: width 0.2s ease, opacity 0.3s ease 0.1s; }
+
+/* ── Mobile: remove tap highlight flash ── */
+@media (max-width: 991px) {
+  * { -webkit-tap-highlight-color: transparent; }
+  .product-item:hover, .goods-item:hover {
+    transform: none !important;
+  }
+}
