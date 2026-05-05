@@ -14,36 +14,17 @@ $pdo = new PDO(
     $env['DB_USERNAME'], $env['DB_PASSWORD']
 );
 
-// Зөв selector: .product-wrap .image .image-old
-$jsStyle = '<script id="dona-image-fix-js">
-(function(){
-  var css =
-    ".product-wrap .image{padding-top:0!important;height:auto!important;}" +
-    ".product-wrap .image .image-old{display:block!important;width:100%!important;height:100px!important;overflow:hidden!important;background:#f8f8f8!important;}" +
-    ".product-wrap .image .image-old img{width:100%!important;height:100%!important;object-fit:cover!important;object-position:center!important;display:block!important;}";
-  function inject(){
-    var old=document.getElementById("dona-img-style");
-    if(old)old.remove();
-    var s=document.createElement("style");
-    s.id="dona-img-style";
-    s.textContent=css;
-    document.head.appendChild(s);
-  }
-  if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",inject);}
-  else{inject();}
-  window.addEventListener("load",inject);
-})();
-</script>';
+// First: check what CSS rules exist for image-old
+$appCss = file_get_contents("$root/public/build/beike/shop/default/css/app.css");
+preg_match_all('/[^{}]*image-old[^{]*\{[^}]+\}/i', $appCss, $m);
+$imageOldRules = $m[0];
 
-$row = $pdo->query("SELECT id, value FROM settings WHERE space='base' AND name='head_code' LIMIT 1")->fetch(PDO::FETCH_ASSOC);
-$current = preg_replace('/<style id="dona-image-fix">[\s\S]*?<\/style>\n?/', '', $row['value']);
-$current = preg_replace('/<script id="dona-image-fix-js">[\s\S]*?<\/script>\n?/', '', $current);
-$newValue = trim($current) . "\n" . $jsStyle;
-$pdo->prepare("UPDATE settings SET value=? WHERE id=?")->execute([$newValue, $row['id']]);
-
-$cleared = 0;
-foreach (glob("$root/storage/framework/views/*.php") as $f) { if(@unlink($f)) $cleared++; }
-foreach (glob("$root/bootstrap/cache/*.php") as $f) { @unlink($f); }
+// Also find the actual CSS class on the img container via app.css
+preg_match_all('/[^{}]*\.image[^{]*\{[^}]+\}/i', $appCss, $m2);
+$imageRules = array_slice($m2[0], 0, 20);
 
 header('Content-Type: application/json');
-echo json_encode(['done'=>true,'cache_cleared'=>$cleared,'fixed_selector'=>'.product-wrap .image .image-old'], JSON_PRETTY_PRINT);
+echo json_encode([
+    'image_old_css_rules' => $imageOldRules,
+    'image_css_rules'     => $imageRules,
+], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
