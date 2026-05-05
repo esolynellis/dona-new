@@ -3,6 +3,9 @@ const CACHE = 'dona-v1';
 const STATIC = [
   '/',
   '/smooth.css',
+  '/build/beike/shop/default/js/app.js',
+  '/build/beike/shop/default/css/app.css',
+  '/build/beike/shop/default/css/bootstrap.css',
 ];
 
 // Assets to cache when first seen

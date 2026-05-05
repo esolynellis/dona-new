@@ -18,7 +18,9 @@ $pdo = new PDO(
 $inject = '<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="dns-prefetch" href="//www.dona-trade.com">
-<link rel="stylesheet" href="/smooth.css?v=2">
+<link rel="preload" href="/build/beike/shop/default/js/app.js" as="script">
+<link rel="preload" href="/build/beike/shop/default/css/app.css" as="style">
+<link rel="stylesheet" href="/smooth.css?v=3">
 <div id="dona-loader"></div>
 <script>
 (function(){
