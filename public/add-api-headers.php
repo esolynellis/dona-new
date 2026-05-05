@@ -58,19 +58,17 @@ $results['1_middleware_file'] = $wrote !== false ? 'created' : 'failed';
 $kernelPath = "$root/app/Http/Kernel.php";
 $kernel = @file_get_contents($kernelPath);
 if ($kernel && strpos($kernel, 'ApiCacheHeaders') === false) {
-    // Add to api middleware group
-    $kernel = str_replace(
-        "'api' => [\n                \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',",
-        "'api' => [\n                \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',\n                \App\Http\Middleware\ApiCacheHeaders::class,",
-        $kernel
-    );
-    if (strpos($kernel, 'ApiCacheHeaders') !== false) {
+    // Add to api middleware group — match exact pattern from Kernel.php
+    $old = "'api'       => [\n            'throttle:api',";
+    $new = "'api'       => [\n            'throttle:api',\n            \App\Http\Middleware\ApiCacheHeaders::class,";
+    if (strpos($kernel, $old) !== false) {
+        $kernel = str_replace($old, $new, $kernel);
         @unlink($kernelPath);
         $wrote = file_put_contents($kernelPath, $kernel);
         $results['2_kernel_registered'] = $wrote !== false ? 'OK' : 'write_failed';
     } else {
         $results['2_kernel_registered'] = 'pattern_not_found';
-        $results['2_kernel_snippet'] = substr($kernel, strpos($kernel, "'api' =>"), 200);
+        $results['2_kernel_snippet'] = substr($kernel, strpos($kernel, "'api'"), 200);
     }
 } else {
     $results['2_kernel_registered'] = $kernel ? 'already_registered' : 'kernel_not_found';
