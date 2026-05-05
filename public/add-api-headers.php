@@ -4,11 +4,8 @@ if (($_GET['key'] ?? '') !== 'dona2025') { http_response_code(403); die(); }
 $root = '/www/wwwroot/dona-new';
 $results = [];
 
-// ── 1. Create CacheHeaders middleware ──
-$middlewareDir = "$root/beike/ShopAPI";
+// ── 1. Create ApiCacheHeaders middleware ──
 $middlewarePath = "$root/app/Http/Middleware/ApiCacheHeaders.php";
-
-// Create middleware file
 $middlewareCode = '<?php
 namespace App\Http\Middleware;
 
@@ -17,33 +14,28 @@ use Illuminate\Http\Request;
 
 class ApiCacheHeaders
 {
-    // Read-only public endpoints that can be cached by browser for 60 seconds
-    private $cacheable = [
-        \'/api/categories\',
+    // Endpoints cacheable in browser for a short time
+    private array $cacheable = [
         \'/api/settings\',
         \'/api/home\',
+        \'/api/categories\',
     ];
 
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next): mixed
     {
         $response = $next($request);
 
-        if ($request->isMethod(\'GET\')) {
+        if ($request->isMethod(\'GET\') && $response->getStatusCode() === 200) {
             $path = $request->getPathInfo();
             $isCacheable = false;
             foreach ($this->cacheable as $prefix) {
                 if (str_starts_with($path, $prefix)) { $isCacheable = true; break; }
             }
-            if ($isCacheable) {
-                $response->header(\'Cache-Control\', \'public, max-age=60, s-maxage=60\');
-            } else {
-                $response->header(\'Cache-Control\', \'no-store\');
-            }
+            $response->header(
+                \'Cache-Control\',
+                $isCacheable ? \'public, max-age=60, s-maxage=60\' : \'no-store\'
+            );
         }
-
-        // Performance headers
-        $response->header(\'X-Powered-By\', \'DONA\');
-        $response->header(\'Timing-Allow-Origin\', \'*\');
 
         return $response;
     }
@@ -54,24 +46,40 @@ class ApiCacheHeaders
 $wrote = file_put_contents($middlewarePath, $middlewareCode);
 $results['1_middleware_file'] = $wrote !== false ? 'created' : 'failed';
 
-// ── 2. Register middleware in Http/Kernel.php ──
+// ── 2. Patch Kernel.php using regex ──
 $kernelPath = "$root/app/Http/Kernel.php";
 $kernel = @file_get_contents($kernelPath);
-if ($kernel && strpos($kernel, 'ApiCacheHeaders') === false) {
-    // Add to api middleware group — match exact pattern from Kernel.php
-    $old = "'api'       => [\n            'throttle:api',";
-    $new = "'api'       => [\n            'throttle:api',\n            \App\Http\Middleware\ApiCacheHeaders::class,";
-    if (strpos($kernel, $old) !== false) {
-        $kernel = str_replace($old, $new, $kernel);
-        @unlink($kernelPath);
-        $wrote = file_put_contents($kernelPath, $kernel);
-        $results['2_kernel_registered'] = $wrote !== false ? 'OK' : 'write_failed';
-    } else {
-        $results['2_kernel_registered'] = 'pattern_not_found';
-        $results['2_kernel_snippet'] = substr($kernel, strpos($kernel, "'api'"), 200);
-    }
+
+if (!$kernel) {
+    $results['2_kernel'] = 'cannot_read';
+} elseif (strpos($kernel, 'ApiCacheHeaders') !== false) {
+    $results['2_kernel'] = 'already_registered';
 } else {
-    $results['2_kernel_registered'] = $kernel ? 'already_registered' : 'kernel_not_found';
+    // Use regex to find 'api' group and insert after the opening
+    // Pattern: find 'api' key followed by [ then first entry ('throttle:...')
+    $patched = preg_replace(
+        "/((['\"])api\\2\s*=>\s*\[(?:\s*\/\/[^\n]*)?\s*)((['\"])throttle:[^'\"]*\\4,)/",
+        '$1$3' . "\n            " . '\\App\\Http\\Middleware\\ApiCacheHeaders::class,',
+        $kernel
+    );
+
+    if ($patched && $patched !== $kernel) {
+        @unlink($kernelPath);
+        $wrote = file_put_contents($kernelPath, $patched);
+        $results['2_kernel'] = $wrote !== false ? 'OK' : 'write_failed';
+    } else {
+        // Fallback: just append to api group differently
+        // Find exact position by searching for 'api' => [ pattern
+        $apiPos = strpos($kernel, "'api'");
+        if ($apiPos === false) $apiPos = strpos($kernel, '"api"');
+
+        if ($apiPos !== false) {
+            $results['2_kernel'] = 'regex_failed';
+            $results['2_kernel_debug'] = substr($kernel, $apiPos, 200);
+        } else {
+            $results['2_kernel'] = 'api_group_not_found';
+        }
+    }
 }
 
 // ── 3. Clear caches ──
