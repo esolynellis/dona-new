@@ -1,63 +1,48 @@
 <?php
 if (($_GET['key'] ?? '') !== 'dona2025') { http_response_code(403); die(); }
 
-$root = '/www/wwwroot/dona-new';
 $results = [];
 
-// 1. Check Redis
-$results['redis_extension'] = extension_loaded('redis') ? 'YES' : 'NO';
-$results['redis_connect'] = 'NO';
-if (extension_loaded('redis')) {
-    try {
-        $redis = new Redis();
-        if ($redis->connect('127.0.0.1', 6379, 2)) {
-            $results['redis_connect'] = 'YES';
-            $redis->set('dona_test', 'ok', 5);
-            $results['redis_test'] = $redis->get('dona_test');
+// Find nginx configs
+$searchPaths = [
+    '/www/server/nginx/conf/vhost/*.conf',
+    '/www/server/panel/vhost/nginx/*.conf',
+    '/etc/nginx/sites-enabled/*',
+    '/etc/nginx/conf.d/*.conf',
+    '/usr/local/nginx/conf/vhost/*.conf',
+    '/www/server/nginx/conf/*.conf',
+];
+foreach ($searchPaths as $pattern) {
+    $files = glob($pattern);
+    if ($files) {
+        $results['nginx_found_at'] = $pattern;
+        foreach ($files as $f) {
+            $content = file_get_contents($f);
+            if (stripos($content, 'dona') !== false || stripos($content, '103.168') !== false) {
+                $results['dona_conf_path'] = $f;
+                $results['gzip_on'] = strpos($content, 'gzip on') !== false;
+                $results['expires'] = strpos($content, 'expires') !== false;
+                $results['conf_preview'] = substr($content, 0, 800);
+                break;
+            }
         }
-    } catch (Exception $e) {
-        $results['redis_error'] = $e->getMessage();
-    }
-}
-
-// 2. Read .env cache driver
-$env = [];
-foreach (file("$root/.env") as $line) {
-    $line = trim($line);
-    if ($line === '' || $line[0] === '#' || strpos($line, '=') === false) continue;
-    [$k, $v] = explode('=', $line, 2);
-    $env[trim($k)] = trim($v, '"\'');
-}
-$results['current_cache_driver'] = $env['CACHE_DRIVER'] ?? 'not set';
-$results['current_session_driver'] = $env['SESSION_DRIVER'] ?? 'not set';
-
-// 3. Check nginx config location
-$nginxConfs = glob('/www/server/panel/vhost/nginx/*.conf');
-$results['nginx_conf_count'] = count($nginxConfs);
-$results['nginx_confs'] = $nginxConfs;
-
-// 4. Check if gzip already enabled
-$donaNginxConf = '';
-foreach ($nginxConfs as $conf) {
-    if (strpos($conf, 'dona') !== false || strpos(file_get_contents($conf), 'dona-trade.com') !== false) {
-        $donaNginxConf = $conf;
         break;
     }
 }
-$results['dona_nginx_conf'] = $donaNginxConf;
-if ($donaNginxConf) {
-    $confContent = file_get_contents($donaNginxConf);
-    $results['gzip_enabled'] = strpos($confContent, 'gzip on') !== false ? 'YES' : 'NO';
-    $results['expires_set'] = strpos($confContent, 'expires') !== false ? 'YES' : 'NO';
-}
 
-// 5. Check opcache
-$results['opcache'] = extension_loaded('Zend OPcache') ? 'enabled' : 'disabled';
-$results['opcache_status'] = function_exists('opcache_get_status') ? (opcache_get_status(false)['opcache_enabled'] ?? false) ? 'ON' : 'OFF' : 'N/A';
+// Find php.ini
+$phpini = php_ini_loaded_file();
+$results['php_ini'] = $phpini;
+$results['opcache_ini'] = ini_get('opcache.enable');
+$results['opcache_writable'] = is_writable($phpini);
 
-// 6. PHP info
-$results['php_version'] = PHP_VERSION;
-$results['memory_limit'] = ini_get('memory_limit');
+// Check BT panel config dir
+$results['bt_nginx_dir'] = is_dir('/www/server/nginx') ? 'EXISTS' : 'NO';
+$results['bt_panel_dir'] = is_dir('/www/server/panel') ? 'EXISTS' : 'NO';
+
+// Memory & limits
+$results['upload_max'] = ini_get('upload_max_filesize');
+$results['post_max'] = ini_get('post_max_size');
 
 header('Content-Type: application/json');
 echo json_encode($results, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
