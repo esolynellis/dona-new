@@ -15,9 +15,22 @@ $pdo = new PDO(
 );
 
 $style = '<style id="dona-img2">
+/* Desktop: 330px */
 .product-wrap .image .image-old{height:330px!important;max-height:330px!important;min-height:330px!important;width:100%!important;overflow:hidden!important;display:block!important;}
 .product-wrap .image .image-old a{display:block!important;height:330px!important;overflow:hidden!important;}
 .product-wrap .image .image-old img,.product-wrap .image .image-old .lazyload,.product-wrap .image .image-old .lazyloaded{width:100%!important;height:330px!important;max-height:330px!important;object-fit:cover!important;object-position:center center!important;}
+/* Tablet: 220px */
+@media(max-width:992px){
+  .product-wrap .image .image-old{height:220px!important;max-height:220px!important;min-height:220px!important;}
+  .product-wrap .image .image-old a{height:220px!important;}
+  .product-wrap .image .image-old img,.product-wrap .image .image-old .lazyload,.product-wrap .image .image-old .lazyloaded{height:220px!important;max-height:220px!important;}
+}
+/* Mobile: 180px */
+@media(max-width:576px){
+  .product-wrap .image .image-old{height:180px!important;max-height:180px!important;min-height:180px!important;}
+  .product-wrap .image .image-old a{height:180px!important;}
+  .product-wrap .image .image-old img,.product-wrap .image .image-old .lazyload,.product-wrap .image .image-old .lazyloaded{height:180px!important;max-height:180px!important;}
+}
 </style>';
 
 $row = $pdo->query("SELECT id, value FROM settings WHERE space='base' AND name='head_code' LIMIT 1")->fetch(PDO::FETCH_ASSOC);
@@ -28,4 +41,4 @@ $pdo->prepare("UPDATE settings SET value=? WHERE id=?")->execute([$newValue, $ro
 foreach (glob("$root/storage/framework/views/*.php") as $f) { @unlink($f); }
 foreach (glob("$root/bootstrap/cache/*.php") as $f) { @unlink($f); }
 
-echo json_encode(['done'=>true,'height'=>'330px','ts'=>time()]);
+echo json_encode(['done'=>true,'desktop'=>'330px','tablet'=>'220px','mobile'=>'180px','ts'=>time()]);
