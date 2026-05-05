@@ -23,8 +23,8 @@ $style = '<style id="dona-cart-fix">
 }
 @media(max-width:480px){
   .product-wrap .image .button-wrap{display:flex!important;bottom:0!important;opacity:1!important;}
-  .product-wrap .image .button-wrap .btn-add-cart{font-size:0!important;padding:0!important;min-height:32px!important;display:flex!important;align-items:center!important;justify-content:center!important;}
-  .product-wrap .image .button-wrap .btn-add-cart i,.product-wrap .image .button-wrap .btn-add-cart svg,.product-wrap .image .button-wrap .btn-add-cart .iconfont{font-size:16px!important;display:block!important;}
+  .product-wrap .image .button-wrap .btn-add-cart{font-size:12px!important;padding:6px 4px!important;min-height:32px!important;display:flex!important;align-items:center!important;justify-content:center!important;}
+  .product-wrap .image .button-wrap .btn-add-cart i,.product-wrap .image .button-wrap .btn-add-cart svg,.product-wrap .image .button-wrap .btn-add-cart .iconfont{display:none!important;}
   .product-wrap .image .button-wrap .btn-quick-view{display:none!important;}
   .product-wrap .image .button-wrap .btn-wish{flex:0 0 32px!important;min-height:32px!important;padding:0!important;font-size:14px!important;}
 }
