@@ -43,7 +43,10 @@ $style = '<style id="dona-cart-fix">
     font-size:16px!important;
     display:block!important;
   }
-  .product-wrap .image .button-wrap .btn-quick-view,
+  /* Нүдний товч нуух */
+  .product-wrap .image .button-wrap .btn-quick-view{
+    display:none!important;
+  }
   .product-wrap .image .button-wrap .btn-wish{
     flex:0 0 32px!important;
     min-height:32px!important;
