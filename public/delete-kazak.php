@@ -2,7 +2,6 @@
 set_exception_handler(null); restore_exception_handler();
 ob_start();
 if (($_GET['key'] ?? '') !== 'dona2025') { http_response_code(403); die(); }
-
 $root = '/www/wwwroot/dona-new';
 $env  = [];
 foreach (file("$root/.env") as $ln) {
@@ -11,66 +10,81 @@ foreach (file("$root/.env") as $ln) {
     [$k, $v] = explode('=', $ln, 2);
     $env[trim($k)] = trim($v, '"\'');
 }
-$pdo = new PDO(
-    "mysql:host={$env['DB_HOST']};port={$env['DB_PORT']};dbname={$env['DB_DATABASE']}",
-    $env['DB_USERNAME'], $env['DB_PASSWORD'],
-    [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-);
+$pdo = new PDO("mysql:host={$env['DB_HOST']};port={$env['DB_PORT']};dbname={$env['DB_DATABASE']}", $env['DB_USERNAME'], $env['DB_PASSWORD'], [PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION]);
 $pdo->exec("SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci");
 
+$catId  = 1000150;
 $dryRun = ($_GET['confirm'] ?? '') !== 'yes';
 $out    = [];
 
-// Find Kazakh products - search in goods_name and product_descriptions
-$kazakProducts = $pdo->query("
-    SELECT DISTINCT p.id, p.goods_name, pd.name as desc_name, p.active, p.deleted_at
+// Find products ONLY in this category (not in any other category)
+$onlyInKazak = $pdo->query("
+    SELECT p.id
     FROM products p
-    LEFT JOIN product_descriptions pd ON pd.product_id = p.id
-    WHERE (
-        p.goods_name LIKE '%казак%'
-        OR p.goods_name LIKE '%Казак%'
-        OR p.goods_name LIKE '%казах%'
-        OR p.goods_name LIKE '%Казах%'
-        OR p.goods_name LIKE '%казак%'
-        OR pd.name LIKE '%казак%'
-        OR pd.name LIKE '%Казак%'
-        OR pd.name LIKE '%казах%'
-    )
-    AND p.deleted_at IS NULL
-")->fetchAll(PDO::FETCH_ASSOC);
-
-// Find products whose only/all categories no longer exist
-$uncategorized = $pdo->query("
-    SELECT p.id, p.goods_name, pd.name as desc_name,
-           GROUP_CONCAT(pc.category_id) as cat_ids
-    FROM products p
-    LEFT JOIN product_descriptions pd ON pd.product_id = p.id AND pd.locale = 'mn'
-    LEFT JOIN product_categories pc ON pc.product_id = p.id
-    LEFT JOIN categories c ON c.id = pc.category_id
+    INNER JOIN product_categories pc ON pc.product_id = p.id AND pc.category_id = $catId
     WHERE p.deleted_at IS NULL
-      AND p.active = 1
-    GROUP BY p.id
-    HAVING SUM(CASE WHEN c.id IS NOT NULL THEN 1 ELSE 0 END) = 0
-    LIMIT 30
+      AND (
+          SELECT COUNT(*) FROM product_categories pc2
+          WHERE pc2.product_id = p.id AND pc2.category_id != $catId
+      ) = 0
+")->fetchAll(PDO::FETCH_COLUMN);
+
+// Products also in other categories (won't be deleted, just unlinked from kazak)
+$alsoElsewhere = $pdo->query("
+    SELECT p.id, pd.name
+    FROM products p
+    INNER JOIN product_categories pc ON pc.product_id = p.id AND pc.category_id = $catId
+    LEFT JOIN product_descriptions pd ON pd.product_id = p.id AND pd.locale = 'mn'
+    WHERE p.deleted_at IS NULL
+      AND (
+          SELECT COUNT(*) FROM product_categories pc2
+          WHERE pc2.product_id = p.id AND pc2.category_id != $catId
+      ) > 0
+    LIMIT 10
 ")->fetchAll(PDO::FETCH_ASSOC);
 
-$out['kazak_products']   = $kazakProducts;
-$out['kazak_count']      = count($kazakProducts);
-$out['uncategorized_sample'] = $uncategorized;
-$out['dry_run']          = $dryRun;
+$out['category_id']        = $catId;
+$out['only_in_kazak']      = count($onlyInKazak);
+$out['also_elsewhere']     = count($alsoElsewhere);
+$out['also_elsewhere_sample'] = $alsoElsewhere;
+$out['dry_run']            = $dryRun;
 
-if (!$dryRun && !empty($kazakProducts)) {
-    $ids = array_column($kazakProducts, 'id');
-    $ph  = implode(',', array_fill(0, count($ids), '?'));
+if (!$dryRun) {
+    // 1. Soft-delete products that are ONLY in this category
+    if (!empty($onlyInKazak)) {
+        $ph = implode(',', array_fill(0, count($onlyInKazak), '?'));
+        $stmt = $pdo->prepare("UPDATE products SET deleted_at = NOW(), active = 0 WHERE id IN ($ph)");
+        $stmt->execute($onlyInKazak);
+        $out['products_deleted'] = $stmt->rowCount();
+    } else {
+        $out['products_deleted'] = 0;
+    }
 
-    $tables = $pdo->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
+    // 2. Remove product_categories links for this category
+    $stmt = $pdo->prepare("DELETE FROM product_categories WHERE category_id = ?");
+    $stmt->execute([$catId]);
+    $out['product_category_links_removed'] = $stmt->rowCount();
 
-    // Soft delete (set deleted_at)
-    $stmt = $pdo->prepare("UPDATE products SET deleted_at = NOW() WHERE id IN ($ph)");
-    $stmt->execute($ids);
-    $out['deleted_count'] = $stmt->rowCount();
-    $out['status'] = 'DONE - soft deleted';
-} else if ($dryRun) {
+    // 3. Delete category_descriptions
+    $stmt = $pdo->prepare("DELETE FROM category_descriptions WHERE category_id = ?");
+    $stmt->execute([$catId]);
+    $out['category_descriptions_deleted'] = $stmt->rowCount();
+
+    // 4. Delete category_paths
+    $tables = $pdo->query("SHOW TABLES LIKE 'category_paths'")->fetchColumn();
+    if ($tables) {
+        $stmt = $pdo->prepare("DELETE FROM category_paths WHERE category_id = ? OR path_id = ?");
+        $stmt->execute([$catId, $catId]);
+        $out['category_paths_deleted'] = $stmt->rowCount();
+    }
+
+    // 5. Delete the category itself
+    $stmt = $pdo->prepare("DELETE FROM categories WHERE id = ?");
+    $stmt->execute([$catId]);
+    $out['category_deleted'] = $stmt->rowCount();
+
+    $out['status'] = 'DONE';
+} else {
     $out['status'] = 'DRY RUN – add ?confirm=yes to delete';
 }
 
