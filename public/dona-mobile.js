@@ -1,6 +1,8 @@
 /**
- * DONA Mobile UI - Category chips + filter bar redesign
- * Only activates on mobile (<992px)
+ * DONA Mobile UI v2
+ * - Category chips bar (excludes "Ангилаагүй")
+ * - Clean filter bar
+ * - Modern side menu
  */
 (function () {
   'use strict';
@@ -54,20 +56,88 @@
       'margin-left:8px!important;',
     '}',
     '.page-categories .product-tool .right-per-page{',
-      'flex:1;justify-content:space-between!important;',
-      'max-width:100%;',
+      'flex:1;justify-content:space-between!important;max-width:100%;',
     '}',
-    '.page-categories .product-tool .d-flex.align-items-center{',
-      'flex-shrink:0;',
-    '}',
+    '.page-categories .product-tool .d-flex.align-items-center{flex-shrink:0;}',
 
     /* ── Breadcrumb ── */
     '.breadcrumb-wrap .breadcrumb{font-size:12px;}',
-    '.breadcrumb-wrap .breadcrumb-item+.breadcrumb-item::before{',
-      'font-size:10px;',
-    '}',
 
     '}', /* end @media */
+
+    /* ── Side menu (offcanvas) – all screen sizes ── */
+    '#offcanvas-mobile-menu{width:82%!important;}',
+
+    '#offcanvas-mobile-menu .offcanvas-header{',
+      'background:#3B36DB;',
+      'padding:14px 16px;',
+    '}',
+    '#offcanvas-mobile-menu .offcanvas-title{',
+      'color:#fff;font-weight:700;font-size:15px;',
+    '}',
+    '#offcanvas-mobile-menu .btn-close{',
+      'filter:invert(1);opacity:0.85;',
+    '}',
+
+    '#offcanvas-mobile-menu .mobile-menu-wrap{padding:0;}',
+
+    '#offcanvas-mobile-menu .accordion-item{',
+      'border:none!important;',
+      'border-bottom:1px solid #f4f4f5!important;',
+    '}',
+
+    '#offcanvas-mobile-menu .nav-item-text>a{',
+      'font-size:14px;font-weight:500;',
+      'color:#18181b;',
+      'height:48px;padding-left:16px;',
+    '}',
+    '#offcanvas-mobile-menu .nav-item-text>span{',
+      'border-left:none!important;',
+      'width:40px;height:48px;',
+      'color:#a1a1aa;',
+    '}',
+    '#offcanvas-mobile-menu .nav-item-text>span[aria-expanded="true"]{',
+      'background:#f4f4f5;color:#3B36DB;',
+    '}',
+
+    /* Expanded accordion content area */
+    '#offcanvas-mobile-menu .accordion-collapse{',
+      'background:#fafafa;',
+      'border-top:1px solid #f0f0f0!important;',
+      'padding:4px 0!important;',
+    '}',
+
+    /* Child group items */
+    '#offcanvas-mobile-menu .children-group .children-title{',
+      'height:42px;padding:0 16px;',
+      'font-size:13px;font-weight:500;color:#3f3f46;',
+    '}',
+    '#offcanvas-mobile-menu .ul-children .nav-link{',
+      'font-size:13px;color:#71717a;',
+      'padding:8px 24px!important;',
+    '}',
+    '#offcanvas-mobile-menu .ul-children .nav-link:hover{color:#3B36DB;}',
+
+    /* Category section inside side menu */
+    '.dona-menu-cats{padding:12px 16px 4px;}',
+    '.dona-menu-cats-title{',
+      'font-size:11px;font-weight:600;',
+      'color:#a1a1aa;letter-spacing:.05em;',
+      'text-transform:uppercase;',
+      'margin-bottom:8px;',
+    '}',
+    '.dona-menu-cat-link{',
+      'display:flex;align-items:center;',
+      'padding:9px 0;',
+      'font-size:14px;color:#18181b;',
+      'text-decoration:none;',
+      'border-bottom:1px solid #f4f4f5;',
+    '}',
+    '.dona-menu-cat-link:last-child{border-bottom:none;}',
+    '.dona-menu-cat-link.is-active{color:#3B36DB;font-weight:600;}',
+    '.dona-menu-cat-link .dona-cat-arrow{',
+      'margin-left:auto;color:#d4d4d8;font-size:12px;',
+    '}',
   ].join('');
 
   /* ── inject CSS ───────────────────────────────────────── */
@@ -77,6 +147,21 @@
     s.id = 'dona-mobile-css';
     s.textContent = CSS;
     document.head.appendChild(s);
+  }
+
+  /* ── Skip list for chips & side menu ─────────────────── */
+  // IDs or name fragments to hide (Ангилаагүй = uncategorized)
+  var SKIP_SLUGS = ['1000101'];
+  var SKIP_NAMES = ['Ангилаагүй'];
+
+  function shouldSkip(href, name) {
+    for (var i = 0; i < SKIP_SLUGS.length; i++) {
+      if (href && href.indexOf(SKIP_SLUGS[i]) !== -1) return true;
+    }
+    for (var j = 0; j < SKIP_NAMES.length; j++) {
+      if (name && name.trim() === SKIP_NAMES[j]) return true;
+    }
+    return false;
   }
 
   /* ── build chips from hidden sidebar ────────────────── */
@@ -94,16 +179,18 @@
     catItems.forEach(function (li) {
       var a = li.querySelector(':scope > a.category-href');
       if (!a) return;
+      var name = a.textContent.trim();
+      if (shouldSkip(a.href, name)) return;   // ← skip Ангилаагүй
+
       var chip = document.createElement('a');
       chip.className = 'dona-chip' + (li.classList.contains('active') ? ' is-active' : '');
       chip.href = a.href;
-      chip.textContent = a.textContent.trim();
+      chip.textContent = name;
       wrap.appendChild(chip);
     });
 
     if (!wrap.children.length) return;
 
-    /* Insert before .product-tool inside .right-column */
     var rightCol = document.querySelector('.right-column');
     if (!rightCol) return;
     var productTool = rightCol.querySelector('.product-tool');
@@ -119,11 +206,50 @@
     }
   }
 
+  /* ── inject category list inside side menu ─────────── */
+  function buildMenuCats() {
+    var menuBody = document.querySelector('#offcanvas-mobile-menu .mobile-menu-wrap');
+    if (!menuBody) return;
+    if (menuBody.querySelector('.dona-menu-cats')) return;
+
+    var catItems = document.querySelectorAll('#category-one > li');
+    if (!catItems.length) return;
+
+    var section = document.createElement('div');
+    section.className = 'dona-menu-cats';
+
+    var title = document.createElement('div');
+    title.className = 'dona-menu-cats-title';
+    title.textContent = 'Ангилал';
+    section.appendChild(title);
+
+    catItems.forEach(function (li) {
+      var a = li.querySelector(':scope > a.category-href');
+      if (!a) return;
+      var name = a.textContent.trim();
+      if (shouldSkip(a.href, name)) return;   // ← skip Ангилаагүй
+
+      var link = document.createElement('a');
+      link.className = 'dona-menu-cat-link' + (li.classList.contains('active') ? ' is-active' : '');
+      link.href = a.href;
+      link.innerHTML = name + '<span class="dona-cat-arrow">›</span>';
+      section.appendChild(link);
+    });
+
+    /* Prepend category section before accordion menu */
+    var accordion = menuBody.querySelector('#menu-accordion');
+    menuBody.insertBefore(section, accordion);
+  }
+
   /* ── run ─────────────────────────────────────────────── */
   injectCSS();
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', buildChips);
+    document.addEventListener('DOMContentLoaded', function () {
+      buildChips();
+      buildMenuCats();
+    });
   } else {
     buildChips();
+    buildMenuCats();
   }
 })();
