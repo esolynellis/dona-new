@@ -33,11 +33,11 @@ try {
 $row = $pdo->query("SELECT value FROM settings WHERE space='base' AND name='head_code' LIMIT 1")->fetch(PDO::FETCH_ASSOC);
 $current = $row['value'] ?? '';
 
-$tag = '<script src="/brand-group.js?v=2" defer></script>';
+$tag = '<script src="/brand-group.js?v=3" defer></script>';
 
 if (str_contains($current, 'brand-group.js')) {
     // Already injected - update version
-    $new = preg_replace('/brand-group\.js\?v=\d+/', 'brand-group.js?v=2', $current);
+    $new = preg_replace('/brand-group\.js\?v=\d+/', 'brand-group.js?v=3', $current);
     $msg = 'updated version';
 } else {
     $new = $current . "\n" . $tag;
