@@ -18,17 +18,17 @@ $pdo = new PDO(
 );
 $pdo->exec("SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci");
 
-$tag = '<script src="/dona-mobile.js?v=3" defer></script>';
+$tag = '<script src="/dona-mobile.js?v=4" defer></script>';
 
 $row = $pdo->query("SELECT value FROM settings WHERE space='base' AND name='head_code' LIMIT 1")->fetch(PDO::FETCH_ASSOC);
 $current = $row['value'] ?? '';
 
 if (strpos($current, 'dona-mobile.js') !== false) {
-    $current = preg_replace('/dona-mobile\.js\?v=\d+/', 'dona-mobile.js?v=3', $current);
-    $msg = 'updated to v3';
+    $current = preg_replace('/dona-mobile\.js\?v=\d+/', 'dona-mobile.js?v=4', $current);
+    $msg = 'updated to v4';
 } else {
     $current = trim($current) . "\n" . $tag;
-    $msg = 'injected v3';
+    $msg = 'injected v4';
 }
 
 $stmt = $pdo->prepare("UPDATE settings SET value=? WHERE space='base' AND name='head_code'");
