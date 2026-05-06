@@ -39,17 +39,19 @@ $kazakProducts = $pdo->query("
     AND p.deleted_at IS NULL
 ")->fetchAll(PDO::FETCH_ASSOC);
 
-// Also find uncategorized products (not in product_categories at all)
+// Find products whose only/all categories no longer exist
 $uncategorized = $pdo->query("
-    SELECT p.id, p.goods_name, pd.name as desc_name
+    SELECT p.id, p.goods_name, pd.name as desc_name,
+           GROUP_CONCAT(pc.category_id) as cat_ids
     FROM products p
     LEFT JOIN product_descriptions pd ON pd.product_id = p.id AND pd.locale = 'mn'
     LEFT JOIN product_categories pc ON pc.product_id = p.id
-    WHERE pc.product_id IS NULL
-      AND p.deleted_at IS NULL
+    LEFT JOIN categories c ON c.id = pc.category_id
+    WHERE p.deleted_at IS NULL
       AND p.active = 1
     GROUP BY p.id
-    LIMIT 20
+    HAVING SUM(CASE WHEN c.id IS NOT NULL THEN 1 ELSE 0 END) = 0
+    LIMIT 30
 ")->fetchAll(PDO::FETCH_ASSOC);
 
 $out['kazak_products']   = $kazakProducts;
