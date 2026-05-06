@@ -1,7 +1,7 @@
 /**
- * DONA Mobile UI v6
- * - Single compact chip row (sub-cats of active parent)
- * - Side menu: full category tree, small clean font, !important fixes
+ * DONA Mobile UI v7
+ * - Chips: sub-cats of active parent (category pages only, from #category-one)
+ * - Side menu: built from #menu-accordion (exists on ALL pages)
  */
 (function () {
   'use strict';
@@ -50,70 +50,69 @@
 
     '}',
 
-    /* ── side menu – outside media query so offcanvas works everywhere ── */
-    '#offcanvas-mobile-menu{width:80%!important;}',
-    '#offcanvas-mobile-menu .offcanvas-header{background:#3B36DB!important;padding:13px 16px!important;}',
-    '#offcanvas-mobile-menu .offcanvas-title{color:#fff!important;font-weight:700;font-size:14px;}',
-    '#offcanvas-mobile-menu .btn-close{filter:invert(1);opacity:0.8;}',
+    /* ── side menu (no media query – works in offcanvas on all pages) ── */
+    '#offcanvas-mobile-menu{width:82%!important;}',
+    '#offcanvas-mobile-menu .offcanvas-header{background:#3B36DB!important;padding:14px 16px!important;}',
+    '#offcanvas-mobile-menu .offcanvas-title{color:#fff!important;font-weight:700;font-size:15px;}',
+    '#offcanvas-mobile-menu .btn-close{filter:invert(1);opacity:.85;}',
     '#offcanvas-mobile-menu .mobile-menu-wrap{padding:0!important;}',
 
-    /* hide original accordion */
+    /* hide original accordion – we replace it */
     '#offcanvas-mobile-menu #menu-accordion{display:none!important;}',
 
-    /* category tree container */
-    '.dona-cat-tree{padding:0;overflow-y:auto;background:#fff;}',
+    /* tree wrapper */
+    '.dona-cat-tree{display:block;background:#fff;}',
 
     /* section label */
-    '.dona-cat-tree .dona-cat-tree-label{',
-      'display:block!important;',
-      'font-size:10px!important;font-weight:700!important;letter-spacing:.07em;',
-      'color:#aaa!important;text-transform:uppercase;',
-      'padding:12px 16px 4px!important;',
-      'text-decoration:none!important;',
-    '}',
+    '.dona-cat-tree-label{display:block!important;font-size:10px!important;font-weight:700!important;',
+      'letter-spacing:.08em;color:#aaa!important;text-transform:uppercase;',
+      'padding:14px 16px 5px!important;text-decoration:none!important;}',
 
-    /* parent row – use !important to beat Bootstrap a{color:...} */
-    '.dona-cat-tree .dona-parent-row{',
-      'display:flex!important;align-items:center;',
-      'padding:10px 16px!important;',
-      'font-size:13px!important;font-weight:600!important;color:#111!important;',
-      'text-decoration:none!important;',
-      'border-bottom:1px solid #f0f0f0!important;',
-      'cursor:pointer;background:#fff!important;',
-    '}',
-    '.dona-cat-tree .dona-parent-row.is-active{color:#3B36DB!important;}',
-    '.dona-cat-tree .dona-parent-row .dona-arr{margin-left:auto;font-size:16px;color:#ccc!important;transition:transform .2s;display:inline-block;}',
-    '.dona-cat-tree .dona-parent-row.open .dona-arr{transform:rotate(90deg);color:#3B36DB!important;}',
+    /* top-level row (div, not a, to avoid Bootstrap link colour) */
+    '.dona-nav-row{display:flex!important;align-items:center;',
+      'padding:11px 16px!important;font-size:13px!important;font-weight:600!important;',
+      'color:#111!important;text-decoration:none!important;',
+      'border-bottom:1px solid #f0f0f0!important;cursor:pointer;background:#fff!important;}',
+    '.dona-nav-row.is-active{color:#3B36DB!important;background:#f4f3ff!important;}',
+    '.dona-nav-row .dona-arr{margin-left:auto;font-size:18px;line-height:1;',
+      'color:#ccc!important;transition:transform .2s;display:inline-block;flex-shrink:0;}',
+    '.dona-nav-row.open .dona-arr{transform:rotate(90deg);color:#3B36DB!important;}',
 
-    /* children list */
-    '.dona-cat-tree .dona-child-list{display:none!important;background:#f8f8f8;}',
-    '.dona-cat-tree .dona-child-list.open{display:block!important;}',
+    /* child list */
+    '.dona-child-list{display:none!important;background:#f8f8f8;}',
+    '.dona-child-list.open{display:block!important;}',
 
-    /* child link */
-    '.dona-cat-tree .dona-child-link{',
-      'display:flex!important;align-items:center;',
-      'padding:9px 16px 9px 28px!important;',
-      'font-size:12px!important;color:#555!important;',
-      'text-decoration:none!important;',
-      'border-bottom:1px solid #efefef!important;',
-      'background:#f8f8f8!important;',
-    '}',
-    '.dona-cat-tree .dona-child-link:last-child{border-bottom:none!important;}',
-    '.dona-cat-tree .dona-child-link.is-active{color:#3B36DB!important;font-weight:600!important;}',
-    '.dona-cat-tree .dona-child-link::before{content:"·";margin-right:6px;color:#bbb!important;}',
-    '.dona-cat-tree .dona-child-link.is-active::before{color:#3B36DB!important;}',
+    /* child link (a tag needs aggressive override) */
+    '.dona-child-link{display:flex!important;align-items:center;',
+      'padding:9px 16px 9px 26px!important;font-size:12px!important;',
+      'color:#555!important;text-decoration:none!important;',
+      'border-bottom:1px solid #efefef!important;background:#f8f8f8!important;}',
+    '.dona-child-link.is-active{color:#3B36DB!important;font-weight:600!important;background:#eeeeff!important;}',
+    '.dona-child-link::before{content:"›";margin-right:6px;color:#bbb!important;font-size:14px;}',
+    '.dona-child-link.is-active::before{color:#3B36DB!important;}',
   ].join('');
 
   function injectCSS() {
-    var existing = document.getElementById('dona-mobile-css');
-    if (existing) existing.remove();
+    var old = document.getElementById('dona-mobile-css');
+    if (old) old.remove();
     var s = document.createElement('style');
     s.id = 'dona-mobile-css';
     s.textContent = CSS;
     document.head.appendChild(s);
   }
 
-  /* ── find active top-level li ───────────────────────── */
+  /* ── detect current active URL ───────────────────────── */
+  var CUR = window.location.pathname;
+
+  function isCurrentHref(href) {
+    if (!href || href === '#' || href.startsWith('#')) return false;
+    try {
+      var u = new URL(href, window.location.origin);
+      return u.pathname === CUR;
+    } catch (e) { return false; }
+  }
+
+  /* ── find active top-level li (category pages) ───────── */
   function findActiveLi() {
     var activeChild = document.querySelector('#category-one li.child-category.active');
     if (activeChild) {
@@ -126,7 +125,7 @@
     return document.querySelector('#category-one > li.active') || null;
   }
 
-  /* ── chips (sub-cats of active parent) ─────────────── */
+  /* ── chips (category pages only) ────────────────────── */
   function buildChips() {
     if (window.innerWidth >= 992) return;
     if (!document.querySelector('.page-categories')) return;
@@ -163,7 +162,6 @@
           wrap.appendChild(chip);
         });
       } else {
-        /* top-level only – no children */
         document.querySelectorAll('#category-one > li').forEach(function (li) {
           var a = li.querySelector(':scope > a.category-href');
           if (!a) return;
@@ -179,7 +177,6 @@
     }
 
     if (!wrap.children.length) return;
-
     var productTool = rightCol.querySelector('.product-tool');
     rightCol.insertBefore(wrap, productTool || rightCol.firstChild);
 
@@ -191,94 +188,100 @@
     }
   }
 
-  /* ── full category tree in side menu ────────────────── */
+  /* ── side menu tree from #menu-accordion (all pages) ─── */
   function buildMenuCats() {
     var menuBody = document.querySelector('#offcanvas-mobile-menu .mobile-menu-wrap');
     if (!menuBody) return;
+    if (menuBody.querySelector('.dona-cat-tree')) return; /* already built */
 
-    /* remove old tree if any (allow rebuild) */
-    var oldTree = menuBody.querySelector('.dona-cat-tree');
-    if (oldTree) return; /* already built */
-
-    var topItems = document.querySelectorAll('#category-one > li');
-    if (!topItems.length) return;
-
-    var activeLi      = findActiveLi();
-    var activeChildEl = document.querySelector('#category-one li.child-category.active');
+    /* source: the accordion items already in the offcanvas */
+    var accordionItems = menuBody.querySelectorAll('#menu-accordion > .accordion-item');
+    if (!accordionItems.length) return;
 
     var tree = document.createElement('div');
     tree.className = 'dona-cat-tree';
 
-    var label = document.createElement('div');
-    label.className = 'dona-cat-tree-label';
-    label.textContent = 'Ангилал';
-    tree.appendChild(label);
+    accordionItems.forEach(function (item) {
+      var topLink = item.querySelector(':scope > .nav-item-text > a.nav-link');
+      if (!topLink) return;
 
-    topItems.forEach(function (li) {
-      var a = li.querySelector(':scope > a.category-href');
-      if (!a) return;
-      var name = a.textContent.trim();
-      if (shouldSkip(a.href, name)) return;
+      var name = topLink.textContent.trim();
+      if (!name) return;
 
-      var isActiveParent = (li === activeLi);
-      var childUl        = li.querySelector(':scope > ul.accordion-collapse');
-      var children       = childUl ? childUl.querySelectorAll(':scope > li.child-category') : [];
-      var hasChildren    = children.length > 0;
+      var href = topLink.getAttribute('href') || '';
+      var isHashOnly = !href || href === '#' || href.charAt(0) === '#';
 
-      /* parent row */
+      /* gather children from ul.ul-children */
+      var childAnchors = item.querySelectorAll('.ul-children .nav-item a.nav-link');
+      var hasChildren  = childAnchors.length > 0;
+
+      /* determine active state */
+      var isActive = false;
+      if (!isHashOnly && isCurrentHref(href)) isActive = true;
+      if (!isActive && hasChildren) {
+        childAnchors.forEach(function (ca) {
+          if (isCurrentHref(ca.getAttribute('href'))) isActive = true;
+        });
+      }
+
+      /* ── parent row (div to avoid Bootstrap a-tag colour override) ── */
       var row = document.createElement('div');
-      row.className = 'dona-parent-row' + (isActiveParent ? ' is-active' : '') + (isActiveParent && hasChildren ? ' open' : '');
-      row.style.cssText = 'display:flex!important;align-items:center;padding:10px 16px;font-size:13px;font-weight:600;color:' + (isActiveParent ? '#3B36DB' : '#111') + ';text-decoration:none;border-bottom:1px solid #f0f0f0;cursor:pointer;background:#fff;';
+      row.className = 'dona-nav-row' + (isActive ? ' is-active' : '') + (isActive && hasChildren ? ' open' : '');
 
       var nameSpan = document.createElement('span');
       nameSpan.textContent = name;
-      nameSpan.style.cssText = 'color:inherit;flex:1;';
       row.appendChild(nameSpan);
 
       if (hasChildren) {
         var arr = document.createElement('span');
         arr.className = 'dona-arr';
         arr.textContent = '›';
-        arr.style.cssText = 'margin-left:auto;font-size:18px;color:' + (isActiveParent ? '#3B36DB' : '#ccc') + ';transition:transform .2s;' + (isActiveParent ? 'transform:rotate(90deg);' : '');
         row.appendChild(arr);
-        /* clicking parent row navigates to its page */
-        row.addEventListener('click', function (e) {
-          window.location.href = a.href;
-        });
-      } else {
-        row.addEventListener('click', function () {
-          window.location.href = a.href;
-        });
       }
 
       tree.appendChild(row);
 
-      if (!hasChildren) return;
+      /* ── children list ── */
+      if (hasChildren) {
+        var childList = document.createElement('div');
+        childList.className = 'dona-child-list' + (isActive ? ' open' : '');
 
-      /* children list – open if this is the active parent */
-      var childList = document.createElement('div');
-      childList.className = 'dona-child-list' + (isActiveParent ? ' open' : '');
+        childAnchors.forEach(function (ca) {
+          var childHref = ca.getAttribute('href') || '#';
+          var childName = ca.textContent.trim();
+          if (!childName || shouldSkip(childHref, childName)) return;
 
-      children.forEach(function (cli) {
-        var ca = cli.querySelector(':scope > a.category-href');
-        if (!ca) return;
-        var isActive = (cli === activeChildEl);
-        var cl = document.createElement('a');
-        cl.className = 'dona-child-link' + (isActive ? ' is-active' : '');
-        cl.href = ca.href;
-        cl.style.cssText = 'display:flex!important;align-items:center;padding:9px 16px 9px 28px;font-size:12px;color:' + (isActive ? '#3B36DB' : '#555') + '!important;text-decoration:none!important;border-bottom:1px solid #efefef;background:#f8f8f8;font-weight:' + (isActive ? '600' : '400') + ';';
-        var dot = document.createElement('span');
-        dot.textContent = '· ';
-        dot.style.cssText = 'color:' + (isActive ? '#3B36DB' : '#bbb') + ';margin-right:4px;';
-        cl.prepend(dot);
-        cl.appendChild(document.createTextNode(ca.textContent.trim()));
-        childList.appendChild(cl);
-      });
+          var isChildActive = isCurrentHref(childHref);
+          var cl = document.createElement('a');
+          cl.className = 'dona-child-link' + (isChildActive ? ' is-active' : '');
+          cl.href = childHref;
+          cl.textContent = childName;
+          childList.appendChild(cl);
+        });
 
-      tree.appendChild(childList);
+        tree.appendChild(childList);
+
+        /* toggle: click parent row to expand/collapse children */
+        row.addEventListener('click', function () {
+          var open = childList.classList.contains('open');
+          /* close all */
+          tree.querySelectorAll('.dona-child-list.open').forEach(function (el) { el.classList.remove('open'); });
+          tree.querySelectorAll('.dona-nav-row.open').forEach(function (el) { el.classList.remove('open'); });
+          if (!open) {
+            childList.classList.add('open');
+            row.classList.add('open');
+          }
+        });
+      } else {
+        /* no children – navigate directly */
+        if (!isHashOnly) {
+          row.addEventListener('click', function () { window.location.href = href; });
+          row.style.cursor = 'pointer';
+        }
+      }
     });
 
-    /* insert before accordion */
+    /* insert the tree before (and hiding) the original accordion */
     var accordion = menuBody.querySelector('#menu-accordion');
     menuBody.insertBefore(tree, accordion || menuBody.firstChild);
   }
@@ -297,10 +300,10 @@
     init();
   }
 
-  /* also build when offcanvas menu is shown (Bootstrap event) */
+  /* re-run when offcanvas is shown (catches cases where DOM wasn't ready) */
   document.addEventListener('show.bs.offcanvas', function (e) {
     if (e.target && e.target.id === 'offcanvas-mobile-menu') {
-      setTimeout(buildMenuCats, 50);
+      setTimeout(buildMenuCats, 30);
     }
   });
 })();
