@@ -18,40 +18,42 @@ $pdo = new PDO(
 );
 $pdo->exec("SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci");
 
-// CSS fix for sidebar scroll overlap issue
-// When scrollToFixed makes sidebar position:fixed, it can overlap products
-// Fix: add max-height + overflow-y:auto so sidebar scrolls internally
-$cssTag = '<style id="dona-sidebar-fix">
-.page-categories .left-column .x-fixed-top,
-.page-list .left-column .x-fixed-top {
-  max-height: calc(100vh - 130px);
+// Fix:
+// scrollToFixed makes sidebar position:fixed which causes it to overlap products.
+// Solution: remove x-fixed-top class from left column BEFORE scrollToFixed runs,
+// then apply CSS position:sticky instead (stays in normal flow, no overlap).
+
+$newTag = '<style id="dona-sidebar-fix">
+.dona-sticky-sidebar {
+  position: sticky !important;
+  top: 80px;
+  max-height: calc(100vh - 100px);
   overflow-y: auto;
   overflow-x: hidden;
+  z-index: 10;
 }
-/* Hide scrollbar visually but keep functionality */
-.page-categories .left-column .x-fixed-top::-webkit-scrollbar,
-.page-list .left-column .x-fixed-top::-webkit-scrollbar {
-  width: 3px;
-}
-.page-categories .left-column .x-fixed-top::-webkit-scrollbar-thumb,
-.page-list .left-column .x-fixed-top::-webkit-scrollbar-thumb {
-  background: #ddd;
-  border-radius: 3px;
-}
-</style>';
+.dona-sticky-sidebar::-webkit-scrollbar { width: 3px; }
+.dona-sticky-sidebar::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+</style>
+<script id="dona-sidebar-js">
+// Remove x-fixed-top from left column before scrollToFixed runs (capture phase)
+document.addEventListener("DOMContentLoaded", function() {
+  var els = document.querySelectorAll(".left-column .x-fixed-top");
+  for (var i = 0; i < els.length; i++) {
+    els[i].classList.remove("x-fixed-top");
+    els[i].classList.add("dona-sticky-sidebar");
+  }
+}, true);
+</script>';
 
 $row = $pdo->query("SELECT value FROM settings WHERE space='base' AND name='head_code' LIMIT 1")->fetch(PDO::FETCH_ASSOC);
 $current = $row['value'] ?? '';
 
-if (strpos($current, 'dona-sidebar-fix') !== false) {
-    // Remove old version first
-    $current = preg_replace('/<style id="dona-sidebar-fix">.*?<\/style>/s', '', $current);
-    $msg = 'updated';
-} else {
-    $msg = 'injected new';
-}
+// Remove previous versions
+$current = preg_replace('/<style id="dona-sidebar-fix">.*?<\/style>/s', '', $current);
+$current = preg_replace('/<script id="dona-sidebar-js">.*?<\/script>/s', '', $current);
 
-$new = trim($current) . "\n" . $cssTag;
+$new = trim($current) . "\n" . $newTag;
 
 $stmt = $pdo->prepare("UPDATE settings SET value=? WHERE space='base' AND name='head_code'");
 $stmt->execute([$new]);
@@ -59,7 +61,7 @@ $stmt->execute([$new]);
 ob_clean();
 header('Content-Type: application/json');
 echo json_encode([
-    'status' => $msg,
+    'status' => 'updated',
+    'fix' => 'removes x-fixed-top class → applies CSS sticky instead (no layout shift, no overlap)',
     'affected_rows' => $stmt->rowCount(),
-    'css_added' => 'max-height:calc(100vh-130px) + overflow-y:auto on .x-fixed-top inside left-column',
 ], JSON_PRETTY_PRINT);
