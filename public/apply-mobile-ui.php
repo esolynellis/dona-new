@@ -18,13 +18,13 @@ $pdo = new PDO(
 );
 $pdo->exec("SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci");
 
-$tag = '<script src="/dona-mobile.js?v=5" defer></script>';
+$tag = '<script src="/dona-mobile.js?v=6" defer></script>';
 
 $row = $pdo->query("SELECT value FROM settings WHERE space='base' AND name='head_code' LIMIT 1")->fetch(PDO::FETCH_ASSOC);
 $current = $row['value'] ?? '';
 
 if (strpos($current, 'dona-mobile.js') !== false) {
-    $current = preg_replace('/dona-mobile\.js\?v=\d+/', 'dona-mobile.js?v=5', $current);
+    $current = preg_replace('/dona-mobile\.js\?v=\d+/', 'dona-mobile.js?v=6', $current);
     $msg = 'updated to v5';
 } else {
     $current = trim($current) . "\n" . $tag;

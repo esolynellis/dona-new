@@ -1,7 +1,7 @@
 /**
- * DONA Mobile UI v5
+ * DONA Mobile UI v6
  * - Single compact chip row (sub-cats of active parent)
- * - Side menu: full category tree, small clean font
+ * - Side menu: full category tree, small clean font, !important fixes
  */
 (function () {
   'use strict';
@@ -24,16 +24,16 @@
     '@media (max-width:991.98px){',
 
     /* chip bar */
-    '.dona-chips-wrap{display:flex;align-items:center;overflow-x:auto;gap:6px;',
+    '.dona-chips-wrap{display:flex!important;align-items:center;overflow-x:auto;gap:6px;',
       'padding:8px 12px;background:#fff;border-bottom:1px solid #ebebeb;',
       '-webkit-overflow-scrolling:touch;scrollbar-width:none;}',
     '.dona-chips-wrap::-webkit-scrollbar{display:none;}',
-    '.dona-chip{display:inline-flex;align-items:center;justify-content:center;',
+    '.dona-chip{display:inline-flex!important;align-items:center;justify-content:center;',
       'flex-shrink:0;white-space:nowrap;padding:4px 12px;min-height:28px;',
       'border-radius:999px;font-size:12px;font-weight:500;',
       'text-decoration:none!important;background:#f5f5f7;color:#444!important;',
       'border:1.5px solid transparent;}',
-    '.dona-chip.is-active{background:#3B36DB;color:#fff!important;border-color:#3B36DB;}',
+    '.dona-chip.is-active{background:#3B36DB!important;color:#fff!important;border-color:#3B36DB;}',
 
     /* filter bar */
     '.page-categories .product-tool{padding:6px 0;flex-wrap:nowrap;gap:6px;}',
@@ -50,58 +50,63 @@
 
     '}',
 
-    /* ── side menu ─────────────────────────────────────── */
+    /* ── side menu – outside media query so offcanvas works everywhere ── */
     '#offcanvas-mobile-menu{width:80%!important;}',
-    '#offcanvas-mobile-menu .offcanvas-header{background:#3B36DB;padding:13px 16px;}',
-    '#offcanvas-mobile-menu .offcanvas-title{color:#fff;font-weight:700;font-size:14px;}',
+    '#offcanvas-mobile-menu .offcanvas-header{background:#3B36DB!important;padding:13px 16px!important;}',
+    '#offcanvas-mobile-menu .offcanvas-title{color:#fff!important;font-weight:700;font-size:14px;}',
     '#offcanvas-mobile-menu .btn-close{filter:invert(1);opacity:0.8;}',
-    '#offcanvas-mobile-menu .mobile-menu-wrap{padding:0;}',
+    '#offcanvas-mobile-menu .mobile-menu-wrap{padding:0!important;}',
 
-    /* hide original accordion (we replace with our tree) */
-    '#offcanvas-mobile-menu #menu-accordion{display:none;}',
+    /* hide original accordion */
+    '#offcanvas-mobile-menu #menu-accordion{display:none!important;}',
 
     /* category tree container */
-    '.dona-cat-tree{padding:0;overflow-y:auto;}',
+    '.dona-cat-tree{padding:0;overflow-y:auto;background:#fff;}',
 
     /* section label */
-    '.dona-cat-tree-label{',
-      'font-size:10px;font-weight:700;letter-spacing:.07em;',
-      'color:#aaa;text-transform:uppercase;',
-      'padding:12px 16px 4px;',
+    '.dona-cat-tree .dona-cat-tree-label{',
+      'display:block!important;',
+      'font-size:10px!important;font-weight:700!important;letter-spacing:.07em;',
+      'color:#aaa!important;text-transform:uppercase;',
+      'padding:12px 16px 4px!important;',
+      'text-decoration:none!important;',
     '}',
 
-    /* parent row */
-    '.dona-parent-row{',
-      'display:flex;align-items:center;',
-      'padding:10px 16px;',
-      'font-size:13px;font-weight:600;color:#111;',
-      'text-decoration:none;',
-      'border-bottom:1px solid #f3f3f3;',
-      'cursor:pointer;',
+    /* parent row – use !important to beat Bootstrap a{color:...} */
+    '.dona-cat-tree .dona-parent-row{',
+      'display:flex!important;align-items:center;',
+      'padding:10px 16px!important;',
+      'font-size:13px!important;font-weight:600!important;color:#111!important;',
+      'text-decoration:none!important;',
+      'border-bottom:1px solid #f0f0f0!important;',
+      'cursor:pointer;background:#fff!important;',
     '}',
-    '.dona-parent-row.is-active{color:#3B36DB;}',
-    '.dona-parent-row .dona-arr{margin-left:auto;font-size:14px;color:#ccc;transition:transform .2s;}',
-    '.dona-parent-row.open .dona-arr{transform:rotate(90deg);color:#3B36DB;}',
+    '.dona-cat-tree .dona-parent-row.is-active{color:#3B36DB!important;}',
+    '.dona-cat-tree .dona-parent-row .dona-arr{margin-left:auto;font-size:16px;color:#ccc!important;transition:transform .2s;display:inline-block;}',
+    '.dona-cat-tree .dona-parent-row.open .dona-arr{transform:rotate(90deg);color:#3B36DB!important;}',
 
     /* children list */
-    '.dona-child-list{display:none;background:#fafafa;border-bottom:1px solid #f0f0f0;}',
-    '.dona-child-list.open{display:block;}',
+    '.dona-cat-tree .dona-child-list{display:none!important;background:#f8f8f8;}',
+    '.dona-cat-tree .dona-child-list.open{display:block!important;}',
 
-    '.dona-child-link{',
-      'display:flex;align-items:center;',
-      'padding:8px 16px 8px 28px;',
-      'font-size:12px;color:#555;',
-      'text-decoration:none;',
-      'border-bottom:1px solid #f5f5f5;',
+    /* child link */
+    '.dona-cat-tree .dona-child-link{',
+      'display:flex!important;align-items:center;',
+      'padding:9px 16px 9px 28px!important;',
+      'font-size:12px!important;color:#555!important;',
+      'text-decoration:none!important;',
+      'border-bottom:1px solid #efefef!important;',
+      'background:#f8f8f8!important;',
     '}',
-    '.dona-child-link:last-child{border-bottom:none;}',
-    '.dona-child-link.is-active{color:#3B36DB;font-weight:600;}',
-    '.dona-child-link::before{content:"·";margin-right:6px;color:#ccc;}',
-    '.dona-child-link.is-active::before{color:#3B36DB;}',
+    '.dona-cat-tree .dona-child-link:last-child{border-bottom:none!important;}',
+    '.dona-cat-tree .dona-child-link.is-active{color:#3B36DB!important;font-weight:600!important;}',
+    '.dona-cat-tree .dona-child-link::before{content:"·";margin-right:6px;color:#bbb!important;}',
+    '.dona-cat-tree .dona-child-link.is-active::before{color:#3B36DB!important;}',
   ].join('');
 
   function injectCSS() {
-    if (document.getElementById('dona-mobile-css')) return;
+    var existing = document.getElementById('dona-mobile-css');
+    if (existing) existing.remove();
     var s = document.createElement('style');
     s.id = 'dona-mobile-css';
     s.textContent = CSS;
@@ -158,7 +163,7 @@
           wrap.appendChild(chip);
         });
       } else {
-        /* top-level only */
+        /* top-level only – no children */
         document.querySelectorAll('#category-one > li').forEach(function (li) {
           var a = li.querySelector(':scope > a.category-href');
           if (!a) return;
@@ -189,7 +194,11 @@
   /* ── full category tree in side menu ────────────────── */
   function buildMenuCats() {
     var menuBody = document.querySelector('#offcanvas-mobile-menu .mobile-menu-wrap');
-    if (!menuBody || menuBody.querySelector('.dona-cat-tree')) return;
+    if (!menuBody) return;
+
+    /* remove old tree if any (allow rebuild) */
+    var oldTree = menuBody.querySelector('.dona-cat-tree');
+    if (oldTree) return; /* already built */
 
     var topItems = document.querySelectorAll('#category-one > li');
     if (!topItems.length) return;
@@ -213,45 +222,60 @@
 
       var isActiveParent = (li === activeLi);
       var childUl        = li.querySelector(':scope > ul.accordion-collapse');
-      var hasChildren    = childUl && childUl.querySelectorAll(':scope > li.child-category').length > 0;
+      var children       = childUl ? childUl.querySelectorAll(':scope > li.child-category') : [];
+      var hasChildren    = children.length > 0;
 
       /* parent row */
-      var row = document.createElement('a');
+      var row = document.createElement('div');
       row.className = 'dona-parent-row' + (isActiveParent ? ' is-active' : '') + (isActiveParent && hasChildren ? ' open' : '');
-      row.href = hasChildren ? 'javascript:void(0)' : a.href;
-      row.innerHTML = name + (hasChildren ? '<span class="dona-arr">›</span>' : '');
+      row.style.cssText = 'display:flex!important;align-items:center;padding:10px 16px;font-size:13px;font-weight:600;color:' + (isActiveParent ? '#3B36DB' : '#111') + ';text-decoration:none;border-bottom:1px solid #f0f0f0;cursor:pointer;background:#fff;';
+
+      var nameSpan = document.createElement('span');
+      nameSpan.textContent = name;
+      nameSpan.style.cssText = 'color:inherit;flex:1;';
+      row.appendChild(nameSpan);
+
+      if (hasChildren) {
+        var arr = document.createElement('span');
+        arr.className = 'dona-arr';
+        arr.textContent = '›';
+        arr.style.cssText = 'margin-left:auto;font-size:18px;color:' + (isActiveParent ? '#3B36DB' : '#ccc') + ';transition:transform .2s;' + (isActiveParent ? 'transform:rotate(90deg);' : '');
+        row.appendChild(arr);
+        /* clicking parent row navigates to its page */
+        row.addEventListener('click', function (e) {
+          window.location.href = a.href;
+        });
+      } else {
+        row.addEventListener('click', function () {
+          window.location.href = a.href;
+        });
+      }
+
       tree.appendChild(row);
 
       if (!hasChildren) return;
 
-      /* children list */
+      /* children list – open if this is the active parent */
       var childList = document.createElement('div');
       childList.className = 'dona-child-list' + (isActiveParent ? ' open' : '');
 
-      childUl.querySelectorAll(':scope > li.child-category').forEach(function (cli) {
+      children.forEach(function (cli) {
         var ca = cli.querySelector(':scope > a.category-href');
         if (!ca) return;
+        var isActive = (cli === activeChildEl);
         var cl = document.createElement('a');
-        cl.className = 'dona-child-link' + (cli === activeChildEl ? ' is-active' : '');
+        cl.className = 'dona-child-link' + (isActive ? ' is-active' : '');
         cl.href = ca.href;
-        cl.textContent = ca.textContent.trim();
+        cl.style.cssText = 'display:flex!important;align-items:center;padding:9px 16px 9px 28px;font-size:12px;color:' + (isActive ? '#3B36DB' : '#555') + '!important;text-decoration:none!important;border-bottom:1px solid #efefef;background:#f8f8f8;font-weight:' + (isActive ? '600' : '400') + ';';
+        var dot = document.createElement('span');
+        dot.textContent = '· ';
+        dot.style.cssText = 'color:' + (isActive ? '#3B36DB' : '#bbb') + ';margin-right:4px;';
+        cl.prepend(dot);
+        cl.appendChild(document.createTextNode(ca.textContent.trim()));
         childList.appendChild(cl);
       });
 
       tree.appendChild(childList);
-
-      /* toggle on parent row click */
-      row.addEventListener('click', function (e) {
-        e.preventDefault();
-        var isOpen = childList.classList.contains('open');
-        /* close all others */
-        tree.querySelectorAll('.dona-child-list.open').forEach(function (el) { el.classList.remove('open'); });
-        tree.querySelectorAll('.dona-parent-row.open').forEach(function (el) { el.classList.remove('open'); });
-        if (!isOpen) {
-          childList.classList.add('open');
-          row.classList.add('open');
-        }
-      });
     });
 
     /* insert before accordion */
@@ -261,13 +285,22 @@
 
   /* ── run ─────────────────────────────────────────────── */
   injectCSS();
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function () {
-      buildChips();
-      buildMenuCats();
-    });
-  } else {
+
+  function init() {
     buildChips();
     buildMenuCats();
   }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+  /* also build when offcanvas menu is shown (Bootstrap event) */
+  document.addEventListener('show.bs.offcanvas', function (e) {
+    if (e.target && e.target.id === 'offcanvas-mobile-menu') {
+      setTimeout(buildMenuCats, 50);
+    }
+  });
 })();
