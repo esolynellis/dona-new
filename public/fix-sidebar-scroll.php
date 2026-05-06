@@ -18,50 +18,65 @@ $pdo = new PDO(
 );
 $pdo->exec("SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci");
 
-// Fix:
-// scrollToFixed makes sidebar position:fixed which causes it to overlap products.
-// Solution: remove x-fixed-top class from left column BEFORE scrollToFixed runs,
-// then apply CSS position:sticky instead (stays in normal flow, no overlap).
+$out = [];
 
-$newTag = '<style id="dona-sidebar-fix">
-.dona-sticky-sidebar {
-  position: sticky !important;
-  top: 80px;
-  max-height: calc(100vh - 100px);
-  overflow-y: auto;
-  overflow-x: hidden;
-  z-index: 10;
-}
-.dona-sticky-sidebar::-webkit-scrollbar { width: 3px; }
-.dona-sticky-sidebar::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
-</style>
-<script id="dona-sidebar-js">
-// Remove x-fixed-top from left column before scrollToFixed runs (capture phase)
-document.addEventListener("DOMContentLoaded", function() {
-  var els = document.querySelectorAll(".left-column .x-fixed-top");
-  for (var i = 0; i < els.length; i++) {
-    els[i].classList.remove("x-fixed-top");
-    els[i].classList.add("dona-sticky-sidebar");
-  }
-}, true);
-</script>';
-
+// STEP 1: Remove all my sidebar CSS/JS from head_code
 $row = $pdo->query("SELECT value FROM settings WHERE space='base' AND name='head_code' LIMIT 1")->fetch(PDO::FETCH_ASSOC);
 $current = $row['value'] ?? '';
+$original = $current;
 
-// Remove previous versions
-$current = preg_replace('/<style id="dona-sidebar-fix">.*?<\/style>/s', '', $current);
-$current = preg_replace('/<script id="dona-sidebar-js">.*?<\/script>/s', '', $current);
+$current = preg_replace('/<style id="dona-sidebar-fix">.*?<\/style>\s*/s', '', $current);
+$current = preg_replace('/<script id="dona-sidebar-js">.*?<\/script>\s*/s', '', $current);
+$current = trim($current);
 
-$new = trim($current) . "\n" . $newTag;
+if ($current !== $original) {
+    $stmt = $pdo->prepare("UPDATE settings SET value=? WHERE space='base' AND name='head_code'");
+    $stmt->execute([$current]);
+    $out['head_code'] = 'reverted - removed sidebar CSS/JS';
+} else {
+    $out['head_code'] = 'nothing to remove';
+}
 
-$stmt = $pdo->prepare("UPDATE settings SET value=? WHERE space='base' AND name='head_code'");
-$stmt->execute([$new]);
+// STEP 2: Patch the built app.js to exclude .left-column .x-fixed-top from scrollToFixed
+$jsFile = $root . '/public/build/beike/shop/default/js/app.js';
+if (!file_exists($jsFile)) {
+    $out['js_patch'] = 'ERROR: file not found: ' . $jsFile;
+} else {
+    $js = file_get_contents($jsFile);
+
+    // Check if already patched
+    if (strpos($js, 'not(".left-column') !== false || strpos($js, "not('.left-column") !== false) {
+        $out['js_patch'] = 'already patched';
+    } else {
+        // Find the scrollToFixed call and change selector to exclude left-column
+        // Original: $('.x-fixed-top').scrollToFixed({
+        // Patched:  $('.x-fixed-top').not($('.left-column .x-fixed-top')).scrollToFixed({
+        $patched = str_replace(
+            "$('.x-fixed-top').scrollToFixed({",
+            "$('.x-fixed-top').not($('.left-column .x-fixed-top')).scrollToFixed({",
+            $js,
+            $count
+        );
+        if ($count === 0) {
+            // Try double-quote variant
+            $patched = str_replace(
+                '$(".x-fixed-top").scrollToFixed({',
+                '$(".x-fixed-top").not($(".left-column .x-fixed-top")).scrollToFixed({',
+                $js,
+                $count
+            );
+        }
+        if ($count > 0) {
+            $written = file_put_contents($jsFile, $patched);
+            $out['js_patch'] = $written !== false ? "patched $count occurrence(s)" : 'ERROR: write failed';
+        } else {
+            // Show what's actually in the file around scrollToFixed
+            preg_match('/(.{0,80}scrollToFixed.{0,80})/s', $js, $m);
+            $out['js_patch'] = 'ERROR: pattern not found. Context: ' . ($m[1] ?? 'not found');
+        }
+    }
+}
 
 ob_clean();
 header('Content-Type: application/json');
-echo json_encode([
-    'status' => 'updated',
-    'fix' => 'removes x-fixed-top class → applies CSS sticky instead (no layout shift, no overlap)',
-    'affected_rows' => $stmt->rowCount(),
-], JSON_PRETTY_PRINT);
+echo json_encode($out, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
