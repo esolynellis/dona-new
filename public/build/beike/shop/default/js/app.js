@@ -3035,12 +3035,13 @@ var base = document.querySelector('base').href;
 
 
 $(document).ready(function ($) {
-  if ($(window).width() > 992 && $('.x-fixed-top').length) {
-    $('.x-fixed-top').scrollToFixed({
+  var $toFix = $('.x-fixed-top').not($('.left-column .x-fixed-top'));
+  if ($(window).width() > 992 && $toFix.length) {
+    $toFix.scrollToFixed({
       zIndex: 99,
       marginTop: $('.header-content').outerHeight(true) - 18 || 0,
       limit: function limit() {
-        var limit = $('footer').offset().top - 84 - $('.x-fixed-top').outerHeight(true);
+        var limit = $('footer').offset().top - 84 - $toFix.outerHeight(true);
         return limit;
       }
     });
