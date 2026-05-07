@@ -1,28 +1,17 @@
 <?php
 if (($_GET['key'] ?? '') !== 'dona2025') { http_response_code(403); die(); }
-
+header('Content-Type: text/plain; charset=utf-8');
 $root = '/www/wwwroot/dona-new';
-$results = [];
-
-// Clear compiled Blade views
-$viewPath = "$root/storage/framework/views";
-$files = glob("$viewPath/*.php");
-$count = 0;
-foreach ($files as $f) {
-    if (@unlink($f)) $count++;
+$dirs = ["$root/storage/framework/cache","$root/storage/framework/views","$root/storage/framework/sessions","$root/bootstrap/cache"];
+$total = 0;
+foreach ($dirs as $dir) {
+    if (!is_dir($dir)) { echo "skip: $dir\n"; continue; }
+    $iter = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS));
+    $count = 0;
+    foreach ($iter as $file) {
+        if ($file->isFile() && !str_ends_with($file->getFilename(), '.gitignore')) { @unlink($file->getPathname()); $count++; }
+    }
+    echo "cleared $count from: $dir\n";
+    $total += $count;
 }
-$results['views_cleared'] = $count;
-
-// Clear bootstrap cache
-$bsFiles = glob("$root/bootstrap/cache/*.php");
-foreach ($bsFiles as $f) { @unlink($f); }
-$results['bootstrap_cache_cleared'] = count($bsFiles);
-
-// Clear config/route cache files
-foreach (['config.php','routes.php','packages.php','services.php'] as $cf) {
-    $p = "$root/bootstrap/cache/$cf";
-    if (file_exists($p)) { @unlink($p); $results["deleted_$cf"] = true; }
-}
-
-header('Content-Type: application/json');
-echo json_encode($results, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+echo "\nTotal: $total files cleared. Refresh site!\n";
