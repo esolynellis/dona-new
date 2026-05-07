@@ -143,8 +143,8 @@ function syncProduct(PDO $pdo, array $g, array $validCats): array {
 
         if ($productId) {
             $pdo->prepare("INSERT IGNORE INTO product_descriptions
-                (product_id,locale,name,content,meta_title,meta_description,meta_keyword,created_at,updated_at)
-                VALUES (?,'mn',?,'','','','',NOW(),NOW())"
+                (product_id,locale,name,content,meta_title,meta_description,created_at,updated_at)
+                VALUES (?,'mn',?,'','','',NOW(),NOW())"
             )->execute([$productId, $g['goods_name']??'']);
 
             $pdo->prepare("INSERT IGNORE INTO product_skus
