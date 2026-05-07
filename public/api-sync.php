@@ -149,8 +149,8 @@ function syncProduct(PDO $pdo, array $g, array $validCats): array {
 
             $pdo->prepare("INSERT IGNORE INTO product_skus
                 (product_id,variants,position,images,model,sku,price,origin_price,cost_price,quantity,is_default,created_at,updated_at)
-                VALUES (?,'\"\"',0,?,'default',?,?,?,?,1,NOW(),NOW())"
-            )->execute([$productId,$imgs,$g['goods_code']??'',$price,$price,$qty]);
+                VALUES (?,'\"\"',0,?,'default',?,?,?,?,?,1,NOW(),NOW())"
+            )->execute([$productId,$imgs,$g['goods_code']??'',$price,$price,$price,$qty]);
 
             $catId = (int)($g['goods_mall_category']??0);
             if ($catId && isset($validCats[$catId])) {
