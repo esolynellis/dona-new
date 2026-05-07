@@ -1,9 +1,9 @@
 <?php
 /**
- * rollback-import.php
- * Remove any products imported from huipi_goods today, restore original state
- * Usage: /rollback-import.php?key=dona2025         (preview what will be deleted)
- *        /rollback-import.php?key=dona2025&run=1   (execute rollback)
+ * rollback-import.php v2
+ * Remove products created at 2026-05-07 00:26 (imported by import-huipi-goods.php)
+ * Usage: /rollback-import.php?key=dona2025         (preview)
+ *        /rollback-import.php?key=dona2025&run=1   (delete)
  */
 if (($_GET['key'] ?? '') !== 'dona2025') { http_response_code(403); die('Forbidden'); }
 
@@ -25,72 +25,69 @@ $pdo = new PDO(
 );
 $pdo->exec("SET NAMES utf8mb4");
 
-/* ── Find products inserted by the import script ── */
-// The import used goods_id from huipi_goods and created_at = NOW() (today)
-// We identify them by: goods_id exists in huipi_goods AND created today
-$today = date('Y-m-d');
-
+// Products created by the import script on 2026-05-07 00:26 (visible in screenshot: 85923-85929)
+// We delete ALL products created on 2026-05-07 between 00:00 and 01:00
 $imported = $pdo->query(
-    "SELECT p.id, p.goods_id, p.price, p.created_at
-     FROM products p
-     INNER JOIN huipi_goods hg ON hg.goods_id = p.goods_id
-     WHERE DATE(p.created_at) >= '$today'
-     ORDER BY p.id"
+    "SELECT id, price, created_at,
+            (SELECT name FROM product_descriptions WHERE product_id=products.id LIMIT 1) as name
+     FROM products
+     WHERE created_at >= '2026-05-07 00:00:00'
+       AND created_at <  '2026-05-07 01:00:00'
+     ORDER BY id"
 )->fetchAll(PDO::FETCH_ASSOC);
 
-$totalProducts = $pdo->query("SELECT COUNT(*) FROM products WHERE deleted_at IS NULL")->fetchColumn();
 $importedCount = count($imported);
+$totalProducts = $pdo->query("SELECT COUNT(*) FROM products WHERE deleted_at IS NULL")->fetchColumn();
 
-echo "=== Import Rollback ===\n";
+echo "=== Rollback v2 ===\n";
 echo "Total products now     : $totalProducts\n";
-echo "Imported today (to del): $importedCount\n\n";
+echo "To be deleted          : $importedCount\n\n";
 
 if ($importedCount === 0) {
-    echo "No products were imported today. Nothing to rollback.\n";
-    echo "Your original data is intact.\n";
+    echo "Nothing found in that time range. Already cleaned or different timestamp.\n";
+
+    // Try broader search: any product created today
+    $broader = $pdo->query(
+        "SELECT id, created_at FROM products WHERE DATE(created_at)='2026-05-07' ORDER BY id LIMIT 30"
+    )->fetchAll(PDO::FETCH_ASSOC);
+    echo "\nAll products created 2026-05-07 (up to 30):\n";
+    foreach ($broader as $r) echo "  id={$r['id']} created={$r['created_at']}\n";
     die();
 }
 
-echo "Products to remove (first 20):\n";
-foreach (array_slice($imported, 0, 20) as $p) {
-    echo "  id={$p['id']} goods_id={$p['goods_id']} price={$p['price']} created={$p['created_at']}\n";
+echo "Products to delete:\n";
+foreach ($imported as $p) {
+    $name = mb_substr($p['name'] ?? '', 0, 50);
+    echo "  id={$p['id']} created={$p['created_at']} price={$p['price']} name=\"$name\"\n";
 }
-if ($importedCount > 20) echo "  ... and " . ($importedCount - 20) . " more\n";
 
 if (!isset($_GET['run'])) {
-    echo "\n-- Preview only. Add &run=1 to DELETE these imported products.\n";
+    echo "\n-- Preview only. Add &run=1 to DELETE these " . $importedCount . " products.\n";
     die();
 }
 
-/* ── EXECUTE ROLLBACK ── */
-echo "\nExecuting rollback...\n";
-
+/* ── DELETE ── */
+echo "\nDeleting...\n";
 $ids = array_column($imported, 'id');
 $placeholders = implode(',', array_fill(0, count($ids), '?'));
 
-// Delete in order: categories → skus → descriptions → products
-$delCats  = $pdo->prepare("DELETE FROM product_categories WHERE product_id IN ($placeholders)");
-$delSkus  = $pdo->prepare("DELETE FROM product_skus WHERE product_id IN ($placeholders)");
-$delDescs = $pdo->prepare("DELETE FROM product_descriptions WHERE product_id IN ($placeholders)");
-$delProds = $pdo->prepare("DELETE FROM products WHERE id IN ($placeholders)");
+$pdo->prepare("DELETE FROM product_categories   WHERE product_id IN ($placeholders)")->execute($ids);
+echo "  product_categories deleted\n";
 
-$delCats->execute($ids);
-echo "  product_categories deleted: " . $delCats->rowCount() . "\n";
+$pdo->prepare("DELETE FROM product_skus         WHERE product_id IN ($placeholders)")->execute($ids);
+echo "  product_skus deleted\n";
 
-$delSkus->execute($ids);
-echo "  product_skus deleted      : " . $delSkus->rowCount() . "\n";
+$pdo->prepare("DELETE FROM product_descriptions WHERE product_id IN ($placeholders)")->execute($ids);
+echo "  product_descriptions deleted\n";
 
-$delDescs->execute($ids);
-echo "  product_descriptions del  : " . $delDescs->rowCount() . "\n";
-
-$delProds->execute($ids);
-echo "  products deleted          : " . $delProds->rowCount() . "\n";
+$stmt = $pdo->prepare("DELETE FROM products WHERE id IN ($placeholders)");
+$stmt->execute($ids);
+echo "  products deleted: " . $stmt->rowCount() . "\n";
 
 $remaining = $pdo->query("SELECT COUNT(*) FROM products WHERE deleted_at IS NULL")->fetchColumn();
 echo "\nProducts remaining: $remaining\n";
 
 /* ── Clear cache ── */
-echo "\nClearing cache...\n";
 $dirs = [
     "$root/storage/framework/cache/data",
     "$root/storage/framework/views",
@@ -109,4 +106,4 @@ foreach ($dirs as $dir) {
 }
 echo "Cache cleared: $cleared files\n";
 
-echo "\n*** ROLLBACK COMPLETE. Original products restored. ***\n";
+echo "\n*** DONE. Imported products removed. Original state restored. ***\n";
