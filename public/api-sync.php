@@ -43,7 +43,7 @@ function getApiToken(): string {
 
 /* ── Fetch one page of products from API ── */
 function fetchPage(string $token, int $page): array {
-    $url = API_BASE . '/adminapi/external.External/searchlists?page=' . $page . '&limit=' . PAGE_SIZE;
+    $url = API_BASE . '/adminapi/external.External/searchlists?page_no=' . $page . '&page_size=' . PAGE_SIZE;
     $ch  = curl_init($url);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
