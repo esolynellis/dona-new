@@ -104,5 +104,6 @@
     @endif
   </script>
   @stack('footer')
+  <script src="{{ asset('dona-admin-inject.js') }}?v=2" defer></script>
 </body>
 </html>
