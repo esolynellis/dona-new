@@ -11,7 +11,7 @@ if (($_GET['key'] ?? '') !== 'dona2025') { http_response_code(403); die('Forbidd
 define('API_BASE',  'https://business.btk123.com');
 define('API_ACCT',  'donaapi');
 define('API_PASS',  '123456');
-define('PAGE_SIZE', 100);
+define('PAGE_SIZE', 25);
 
 /* ── DB ── */
 $root = '/www/wwwroot/dona-new';
@@ -101,19 +101,28 @@ function syncProduct(PDO $pdo, array $g, array $validCats): array {
     ]);
     $result['hg'] = $upsertHG->rowCount() > 0 ? 'upsert' : 'same';
 
-    // 2. Insert into products if not exists
-    $existing = $pdo->prepare("SELECT id FROM products WHERE goods_id=? LIMIT 1");
+    // 2. Insert into products if not exists (also check soft-deleted)
+    $existing = $pdo->prepare("SELECT id, deleted_at FROM products WHERE goods_id=? LIMIT 1");
     $existing->execute([$g['goods_id']]);
-    $existingId = $existing->fetchColumn();
+    $existingRow = $existing->fetch(PDO::FETCH_ASSOC);
+    $existingId = $existingRow ? $existingRow['id'] : false;
 
     if ($existingId) {
-        // Update price and stock in existing product
-        $pdo->prepare("UPDATE products SET price=?, cash_price_small=?, updated_at=NOW() WHERE goods_id=?")
-            ->execute([(float)($g['cash_price_small']??0), (float)($g['cash_price_small']??0), $g['goods_id']]);
+        $price = (float)($g['cash_price_small']??0);
+        $qty   = (int)($g['stock']??0);
+        // Restore soft-deleted product + update price and stock
+        if ($existingRow['deleted_at']) {
+            $pdo->prepare("UPDATE products SET price=?, cash_price_small=?, deleted_at=NULL, active=1, updated_at=NOW() WHERE id=?")
+                ->execute([$price, $price, $existingId]);
+            $result['p'] = 'restored';
+        } else {
+            $pdo->prepare("UPDATE products SET price=?, cash_price_small=?, updated_at=NOW() WHERE id=?")
+                ->execute([$price, $price, $existingId]);
+        }
         // Update SKU quantity and price
         $pdo->prepare("UPDATE product_skus SET price=?, quantity=?, updated_at=NOW() WHERE product_id=?")
-            ->execute([(float)($g['cash_price_small']??0), (int)($g['stock']??0), $existingId]);
-        $result['p'] = 'updated';
+            ->execute([$price, $qty, $existingId]);
+        if ($result['p'] !== 'restored') $result['p'] = 'updated';
     } else {
         // Build images JSON
         $imgArr = [];
@@ -182,11 +191,12 @@ if (($_GET['action']??'') === 'batch') {
     }
 
     $validCats = array_flip($pdo->query("SELECT id FROM categories")->fetchAll(PDO::FETCH_COLUMN));
-    $inserted = $updated = 0;
+    $inserted = $updated = $restored = 0;
 
     foreach ($items as $g) {
         $r = syncProduct($pdo, $g, $validCats);
         if ($r['p']==='inserted') $inserted++;
+        elseif ($r['p']==='restored') $restored++;
         elseif ($r['p']==='updated') $updated++;
     }
 
@@ -205,7 +215,7 @@ if (($_GET['action']??'') === 'batch') {
     }
 
     $remaining = max(0, $totalPages - $page);
-    echo json_encode(['done'=>$done,'inserted'=>$inserted,'updated'=>$updated,
+    echo json_encode(['done'=>$done,'inserted'=>$inserted,'restored'=>$restored,'updated'=>$updated,
         'remaining'=>$remaining,'page'=>$page,'totalPages'=>$totalPages,'total'=>$total]);
     exit;
 }
@@ -302,7 +312,7 @@ body{background:#f0f4ff;font-family:'Segoe UI',sans-serif}
 </div>
 
 <script>
-let running=false, totalIns=0, totalUpd=0, currentPage=1;
+let running=false, totalIns=0, totalUpd=0, totalRst=0, currentPage=1;
 const totalPages=<?= $totalPages ?>;
 
 function addLog(t,c){
@@ -317,7 +327,7 @@ function setBar(page){
   document.getElementById('pbar').style.width=pct+'%';
   document.getElementById('pct-lbl').textContent=pct+'%';
   document.getElementById('stat-lbl').textContent=
-    'Хуудас '+page+'/'+totalPages+' | Нэмсэн: +'+totalIns+' | Шинэчилсэн: '+totalUpd;
+    'Хуудас '+page+'/'+totalPages+' | Нэмсэн: +'+totalIns+' | Сэргэсэн: +'+totalRst+' | Шинэчилсэн: '+totalUpd;
 }
 
 async function startSync(){
@@ -339,15 +349,16 @@ async function startSync(){
 
       totalIns+=d.inserted||0;
       totalUpd+=d.updated||0;
+      totalRst+=d.restored||0;
 
       const msg='Хуудас '+d.page+'/'+d.totalPages+
-        ': +'+d.inserted+' нэмэгдлээ, '+d.updated+' шинэчлэгдлээ';
-      addLog(msg, d.inserted>0?'ok':'warn');
+        ': +'+d.inserted+' нэмэгдлээ, +'+(d.restored||0)+' сэргэсэн, '+d.updated+' шинэчлэгдлээ';
+      addLog(msg, (d.inserted>0||d.restored>0)?'ok':'warn');
       setBar(currentPage);
       currentPage++;
 
       if(d.done){
-        addLog('✅ Бүгд дууслаа! Нийт нэмсэн: +'+totalIns+' | Шинэчилсэн: '+totalUpd,'ok');
+        addLog('✅ Бүгд дууслаа! Нийт нэмсэн: +'+totalIns+' | Сэргэсэн: +'+totalRst+' | Шинэчилсэн: '+totalUpd,'ok');
         document.getElementById('pbar').classList.remove('progress-bar-animated');
         document.getElementById('pbar').style.background='#16a34a';
         document.getElementById('btn').innerHTML='✅ Дуусчилаа — хуудсыг шинэчлэх';
