@@ -63,9 +63,17 @@
 
         <div class="d-flex justify-content-between my-4">
           @if ($type != 'trashed')
-          <a href="{{ admin_route('products.create') }}" class="me-1 nowrap">
-            <button class="btn btn-primary">{{ __('admin/product.products_create') }}</button>
-          </a>
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            <a href="{{ admin_route('products.create') }}" class="me-1 nowrap">
+              <button class="btn btn-primary">{{ __('admin/product.products_create') }}</button>
+            </a>
+            <button class="btn btn-warning nowrap" @click="startHuipiImport" :disabled="huipiRunning"
+              style="font-weight:600">
+              <span v-if="!huipiRunning">➕ Бараа нэмэх</span>
+              <span v-else>⏳ @{{ huipiStatus }}</span>
+            </button>
+            <span v-if="huipiDone" class="text-success fw-bold small">✅ @{{ huipiDoneMsg }}</span>
+          </div>
           @else
             @if ($products->total())
               <button class="btn btn-primary" @click="clearRestore">{{ __('admin/product.clear_restore') }}</button>
@@ -348,6 +356,11 @@
         importing: false,
         selectedIds: [],
         productIds: @json($products->pluck('id')),
+        huipiRunning: false,
+        huipiStatus: '',
+        huipiDone: false,
+        huipiDoneMsg: '',
+        huipiAdded: parseInt(sessionStorage.getItem('__huipi_added') || 0),
       },
 
       computed: {
@@ -363,9 +376,66 @@
 
       created() {
         bk.addFilterCondition(this);
+        // Auto-continue import if navigating across pages
+        if (sessionStorage.getItem('__huipi_pending')) {
+          this.$nextTick(() => this.startHuipiImport());
+        }
       },
 
       methods: {
+        // ── Huipi Goods Import ──────────────────────────────
+        async startHuipiImport() {
+          if (this.huipiRunning) return;
+          this.huipiRunning = true;
+          this.huipiDone   = false;
+
+          const currentPage = parseInt(bk.getQueryString('page') || 1);
+          const ids = this.productIds;
+          this.huipiStatus = 'Хуудас ' + currentPage + ' | ' + ids.length + ' ID...';
+
+          try {
+            const res = await fetch('/dona-bookmarklet.php?key=dona2025&action=import_ids', {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({ids: ids})
+            });
+            const data = await res.json();
+            const added = (data.inserted || 0) + (data.activated || 0);
+            this.huipiAdded += added;
+            sessionStorage.setItem('__huipi_added', this.huipiAdded);
+
+            // Find max page from pagination links
+            let maxPage = currentPage;
+            document.querySelectorAll('.pagination a[href*="page="]').forEach(a => {
+              const m = a.href.match(/page=(\d+)/);
+              if (m && parseInt(m[1]) > maxPage) maxPage = parseInt(m[1]);
+            });
+
+            if (currentPage < maxPage) {
+              this.huipiStatus = 'Хуудас ' + currentPage + '/' + maxPage + ' | +' + this.huipiAdded;
+              sessionStorage.setItem('__huipi_pending', '1');
+              const newFilter = Object.assign({}, this.filter, {page: currentPage + 1});
+              setTimeout(() => { location = bk.objectToUrlParams(newFilter, this.url); }, 600);
+            } else {
+              // Done
+              sessionStorage.removeItem('__huipi_pending');
+              sessionStorage.removeItem('__huipi_added');
+              this.huipiRunning = false;
+              this.huipiDone   = true;
+              this.huipiDoneMsg = 'Бүгд дуусчилаа! Нийт +' + this.huipiAdded + ' бараа нэмэгдлээ';
+              this.huipiAdded  = 0;
+              layer.msg('✅ ' + this.huipiDoneMsg);
+            }
+          } catch(e) {
+            sessionStorage.removeItem('__huipi_pending');
+            sessionStorage.removeItem('__huipi_added');
+            this.huipiRunning = false;
+            this.huipiStatus  = '❌ Алдаа гарлаа';
+            layer.msg('Алдаа: ' + e.message);
+          }
+        },
+        // ────────────────────────────────────────────────────
+
         // 打开批量上传模态框
         openBatchUploadModal() {
           this.showBatchUploadModal = true;
