@@ -38,6 +38,16 @@
     /* ── Product image skeleton ── */
     .product-main-img { min-height: 200px; background: #f5f5f5; }
 
+    /* ── Product description standalone section ── */
+    .product-description {
+      padding: 32px 0;
+      background: #fff;
+      border-top: 1px solid #f0f0f0;
+    }
+    @media (max-width: 991.98px) {
+      .product-description { padding: 20px 0; }
+    }
+
     /* ── Similar & Relations wrapper ── */
     .similar-wrap, .relations-wrap {
       background: linear-gradient(160deg, #fff8f5 0%, #fff3ee 40%, #fdf6ff 100%);
@@ -445,7 +455,34 @@
       </div>
     </div>
 
-    <div class="product-description product-mb-block {{ $iframeClass }}">
+  </div>
+
+  @if ($relations && !request('iframe'))
+    <div class="relations-wrap product-mb-block">
+      <div class="container position-relative">
+        <div class="section-header">
+          <span class="section-title">{{ __('admin/product.product_relations') }}</span>
+        </div>
+        <div class="product swiper-style-plus">
+          <div class="swiper relations-swiper">
+            <div class="swiper-wrapper">
+              @foreach ($relations as $item)
+                <div class="swiper-slide">
+                  @include('shared.product', ['product' => $item])
+                </div>
+              @endforeach
+            </div>
+          </div>
+          <div class="swiper-pagination relations-pagination mt-4"></div>
+          <div class="swiper-button-prev relations-swiper-prev"></div>
+          <div class="swiper-button-next relations-swiper-next"></div>
+        </div>
+      </div>
+    </div>
+  @endif
+
+  <div class="product-description product-mb-block {{ $iframeClass }}">
+    <div class="container">
       @if ($product['attributes'])
         <div class="nav nav-tabs nav-overflow justify-content-start justify-content-md-center border-bottom mb-3">
           <a class="nav-link fw-bold active fs-5" data-bs-toggle="tab" href="#product-description">
@@ -482,30 +519,6 @@
       </div>
     </div>
   </div>
-
-  @if ($relations && !request('iframe'))
-    <div class="relations-wrap product-mb-block">
-      <div class="container position-relative">
-        <div class="section-header">
-          <span class="section-title">{{ __('admin/product.product_relations') }}</span>
-        </div>
-        <div class="product swiper-style-plus">
-          <div class="swiper relations-swiper">
-            <div class="swiper-wrapper">
-              @foreach ($relations as $item)
-                <div class="swiper-slide">
-                  @include('shared.product', ['product' => $item])
-                </div>
-              @endforeach
-            </div>
-          </div>
-          <div class="swiper-pagination relations-pagination mt-4"></div>
-          <div class="swiper-button-prev relations-swiper-prev"></div>
-          <div class="swiper-button-next relations-swiper-next"></div>
-        </div>
-      </div>
-    </div>
-  @endif
 
   @if (!empty($similar) && !request('iframe'))
     <div class="similar-wrap product-mb-block">
