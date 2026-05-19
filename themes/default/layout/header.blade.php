@@ -1,3 +1,33 @@
+<style>
+  .mobile-cat-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .mobile-cat-list li a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 13px 20px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #222;
+    text-decoration: none;
+    border-bottom: 1px solid #f2f2f2;
+  }
+  .mobile-cat-list li.sub a {
+    padding: 10px 20px 10px 36px;
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: #666;
+    background: #fafafa;
+  }
+  .mobile-cat-list li a:active { background: #f5f5f5; }
+  .mobile-cat-list li a .bi-chevron-right {
+    font-size: 12px;
+    color: #bbb;
+  }
+</style>
 <header>
   @hook('header.before')
   <div class="top-wrap">
@@ -167,37 +197,27 @@
     <div class="offcanvas-body mobile-menu-wrap p-0">
       @php $mobileCategories = \Beike\Repositories\CategoryRepo::getTwoLevelCategories(); @endphp
       @if(!empty($mobileCategories))
-        <div class="accordion accordion-flush" id="mobile-cat-accordion">
-          @foreach($mobileCategories as $i => $cat)
-            <div class="accordion-item">
-              <div class="nav-item-text d-flex align-items-center justify-content-between px-3">
-                <a class="nav-link py-3 flex-grow-1" href="{{ shop_route('categories.show', $cat['id']) }}">
-                  {{ $cat['name'] }}
-                </a>
-                @if(!empty($cat['children']))
-                  <span class="collapsed px-2 py-3" data-bs-toggle="collapse" data-bs-target="#mob-cat-{{ $i }}" style="cursor:pointer">
-                    <i class="bi bi-chevron-down" style="font-size:13px"></i>
-                  </span>
-                @endif
-              </div>
-              @if(!empty($cat['children']))
-                <div class="accordion-collapse collapse" id="mob-cat-{{ $i }}" data-bs-parent="#mobile-cat-accordion">
-                  <ul class="nav flex-column ul-children ps-3 pb-2">
-                    @foreach($cat['children'] as $child)
-                      <li class="nav-item">
-                        <a class="nav-link px-3 py-2 text-muted" href="{{ shop_route('categories.show', $child['id']) }}">
-                          {{ $child['name'] }}
-                        </a>
-                      </li>
-                    @endforeach
-                  </ul>
-                </div>
-              @endif
-            </div>
+        <ul class="mobile-cat-list">
+          @foreach($mobileCategories as $cat)
+            <li>
+              <a href="{{ shop_route('categories.show', $cat['id']) }}">
+                {{ $cat['name'] }}
+                <i class="bi bi-chevron-right"></i>
+              </a>
+            </li>
+            @if(!empty($cat['children']))
+              @foreach($cat['children'] as $child)
+                <li class="sub">
+                  <a href="{{ shop_route('categories.show', $child['id']) }}">
+                    {{ $child['name'] }}
+                    <i class="bi bi-chevron-right"></i>
+                  </a>
+                </li>
+              @endforeach
+            @endif
           @endforeach
-        </div>
+        </ul>
       @endif
-      @include('shared.menu-mobile')
     </div>
   </div>
 
