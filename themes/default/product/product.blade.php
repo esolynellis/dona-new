@@ -86,7 +86,8 @@
       .meta-badge.out-stock { background: #fce4ec; color: #c62828; }
       .meta-badge.in-stock  i,
       .meta-badge.out-stock i { font-size: 8px; }
-      .meta-badge.meta-brand { background: #fff3e0; color: #e65100; }
+      .meta-badge.meta-brand    { background: #fff3e0; color: #e65100; }
+      .meta-badge.meta-category { background: #e8eaf6; color: #3949ab; text-decoration: none; }
       /* hide desktop stock-and-sku on mobile */
       .stock-and-sku { display: none; }
 
@@ -464,9 +465,16 @@
             <template v-if="product.quantity > 0">{{ __('shop/products.in_stock') }}</template>
             <template v-else>{{ __('shop/products.out_stock') }}</template>
           </span>
-          <span class="meta-badge">SKU: @{{ product.sku }}</span>
+          {{-- All categories --}}
+          <template v-for="cat in product.cate_names" :key="cat.id">
+            <a :href="'{{ url('/categories/') }}/' + cat.id" class="meta-badge meta-category">
+              <i class="bi bi-grid-3x3-gap-fill"></i> @{{ cat.name }}
+            </a>
+          </template>
           @if ($product['brand_id'])
-            <a href="{{ shop_route('brands.show', $product['brand_id']) }}" class="meta-badge meta-brand">{{ $product['brand_name'] }}</a>
+            <a href="{{ shop_route('brands.show', $product['brand_id']) }}" class="meta-badge meta-brand">
+              <i class="bi bi-bookmark-fill"></i> {{ $product['brand_name'] }}
+            </a>
           @endif
           @if ($product['gunit_text'])
             <span class="meta-badge">{{ $product['gunit_text'] }}</span>

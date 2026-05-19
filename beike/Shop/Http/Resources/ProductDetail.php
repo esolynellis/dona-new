@@ -11,6 +11,8 @@
 
 namespace Beike\Shop\Http\Resources;
 
+use Beike\Models\CategoryDescription;
+use Beike\Models\ProductCategory;
 use Beike\Repositories\ProductRepo;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -37,6 +39,20 @@ class ProductDetail extends JsonResource
         }else{
             $cate_name = '';
         }
+
+        $cate_names = ProductCategory::query()
+            ->where('product_id', $this->id)
+            ->get()
+            ->map(function ($pc) {
+                $desc = CategoryDescription::query()
+                    ->where('locale', locale())
+                    ->where('category_id', $pc->category_id)
+                    ->first();
+                return ['id' => $pc->category_id, 'name' => $desc->name ?? ''];
+            })
+            ->filter(fn($c) => !empty($c['name']))
+            ->values()
+            ->toArray();
         $day = '天';
         $quality = '见包装';
         if (locale() == 'mn'){
@@ -79,7 +95,8 @@ class ProductDetail extends JsonResource
             'min_purchasing_price'            => $this->min_purchasing_price ?? 0,
             'approximately'            => $approximately,
             'integral'            => $this->integral                         ?? 0,
-            'cate_name'            => $cate_name                         ,
+            'cate_name'            => $cate_name,
+            'cate_names'           => $cate_names,
             'images'           => array_map(function ($image) {
                 return [
                     'preview' => image_resize($image, 500, 500),
