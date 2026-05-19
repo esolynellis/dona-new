@@ -1,32 +1,63 @@
 <style>
+  /* ── Mobile category offcanvas ── */
+  .mcv-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: #fd560f;
+  }
+  .mcv-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.3px;
+  }
+  .mcv-close {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 18px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    opacity: 0.9;
+  }
+  .mcv-close:hover { opacity: 1; }
+
   .mobile-cat-list {
     list-style: none;
     margin: 0;
     padding: 0;
   }
-  .mobile-cat-list li a {
+  .mobile-cat-list li.parent > a {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 13px 20px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: #222;
+    padding: 14px 20px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #1a1a1a;
     text-decoration: none;
-    border-bottom: 1px solid #f2f2f2;
+    border-bottom: 1px solid #f0f0f0;
+    background: #fff;
   }
-  .mobile-cat-list li.sub a {
-    padding: 10px 20px 10px 36px;
-    font-size: 0.85rem;
+  .mobile-cat-list li.child > a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 11px 20px 11px 34px;
+    font-size: 0.83rem;
     font-weight: 400;
-    color: #666;
+    color: #555;
+    text-decoration: none;
+    border-bottom: 1px solid #f7f7f7;
     background: #fafafa;
   }
-  .mobile-cat-list li a:active { background: #f5f5f5; }
-  .mobile-cat-list li a .bi-chevron-right {
-    font-size: 12px;
-    color: #bbb;
-  }
+  .mobile-cat-list li.parent > a:active,
+  .mobile-cat-list li.child  > a:active { background: #f0f0f0; }
+  .mobile-cat-list .bi-chevron-right { font-size: 11px; color: #ccc; flex-shrink: 0; }
 </style>
 <header>
   @hook('header.before')
@@ -190,34 +221,32 @@
     </div>
   </div>
   <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvas-mobile-menu">
-    <div class="offcanvas-header border-bottom pb-3">
-      <img src="{{ asset('upload/' . system_setting('base.logo')) }}" alt="logo" style="height:32px;object-fit:contain;" onerror="this.style.display='none'">
-      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    <div class="mcv-header">
+      <span class="mcv-title">Ангилал</span>
+      <button type="button" class="mcv-close" data-bs-dismiss="offcanvas">
+        <i class="bi bi-x-lg"></i>
+      </button>
     </div>
-    <div class="offcanvas-body mobile-menu-wrap p-0">
+    <div class="offcanvas-body p-0">
       @php $mobileCategories = \Beike\Repositories\CategoryRepo::getTwoLevelCategories(); @endphp
-      @if(!empty($mobileCategories))
-        <ul class="mobile-cat-list">
-          @foreach($mobileCategories as $cat)
-            <li>
-              <a href="{{ shop_route('categories.show', $cat['id']) }}">
-                {{ $cat['name'] }}
+      <ul class="mobile-cat-list">
+        @foreach($mobileCategories as $cat)
+          <li class="parent">
+            <a href="{{ shop_route('categories.show', $cat['id']) }}">
+              <span>{{ $cat['name'] }}</span>
+              <i class="bi bi-chevron-right"></i>
+            </a>
+          </li>
+          @foreach($cat['children'] ?? [] as $child)
+            <li class="child">
+              <a href="{{ shop_route('categories.show', $child['id']) }}">
+                <span>{{ $child['name'] }}</span>
                 <i class="bi bi-chevron-right"></i>
               </a>
             </li>
-            @if(!empty($cat['children']))
-              @foreach($cat['children'] as $child)
-                <li class="sub">
-                  <a href="{{ shop_route('categories.show', $child['id']) }}">
-                    {{ $child['name'] }}
-                    <i class="bi bi-chevron-right"></i>
-                  </a>
-                </li>
-              @endforeach
-            @endif
           @endforeach
-        </ul>
-      @endif
+        @endforeach
+      </ul>
     </div>
   </div>
 
