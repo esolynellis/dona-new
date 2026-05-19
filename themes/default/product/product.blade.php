@@ -92,31 +92,80 @@
 
       /* mobile cart block under image */
       .mobile-cart-block {
-        padding: 12px 16px 16px;
+        padding: 12px 16px 14px;
         background: #fff;
         border-top: 1px solid #f0f0f0;
       }
       .mobile-cart-block .quantity-btns {
         display: flex;
         align-items: center;
-        gap: 0;
+        gap: 8px;
       }
-      .mobile-cart-block .quantity-wrap { flex-shrink: 0; width: 60px; }
+      /* quantity stepper */
+      .mobile-cart-block .quantity-wrap {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        border: 1.5px solid #e0e0e0;
+        border-radius: 10px;
+        overflow: hidden;
+        height: 42px;
+      }
       .mobile-cart-block .quantity-wrap .form-control {
+        width: 48px;
         text-align: center;
-        padding: 8px 4px;
-        font-weight: 600;
+        border: none;
+        border-radius: 0;
+        padding: 0;
+        font-weight: 700;
+        font-size: 0.95rem;
+        height: 100%;
+        box-shadow: none;
       }
+      /* Add to cart */
       .mobile-cart-block .add-cart {
         flex: 1;
-        padding: 10px 8px;
-        font-size: 0.82rem;
+        height: 42px;
+        padding: 0 10px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        border-radius: 10px;
+        border: 1.5px solid #222;
+        white-space: nowrap;
+        letter-spacing: 0.2px;
       }
+      /* Buy now */
       .mobile-cart-block .btn-buy-now {
         flex: 1;
-        padding: 10px 8px;
-        font-size: 0.82rem;
+        height: 42px;
+        padding: 0 10px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        border-radius: 10px;
+        background: #fd560f;
+        border: none;
+        white-space: nowrap;
+        letter-spacing: 0.2px;
       }
+      .mobile-cart-block .btn-buy-now:not(:disabled):active {
+        background: #e04a0a;
+      }
+      /* wishlist icon button */
+      .mobile-cart-block .btn-link {
+        flex-shrink: 0;
+        width: 42px;
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1.5px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 0;
+        text-decoration: none;
+        color: #555;
+      }
+      .mobile-cart-block .btn-link i { font-size: 17px; line-height: 1; }
+      .mobile-cart-block button:disabled { opacity: 0.45; }
     }
     @media (min-width: 992px) {
       .stock-and-sku { display: block; }
