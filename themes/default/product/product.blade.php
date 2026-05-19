@@ -359,21 +359,21 @@
               </div>
               <div class="swiper-pagination mobile-pagination"></div>
             </div>
-            {{-- Mobile-only compact meta strip, sits directly under the image --}}
-            <div class="mobile-meta-strip">
-              <span class="meta-badge" :class="product.quantity > 0 ? 'in-stock' : 'out-stock'">
-                <i class="bi bi-circle-fill"></i>
-                <template v-if="product.quantity > 0">{{ __('shop/products.in_stock') }}</template>
-                <template v-else>{{ __('shop/products.out_stock') }}</template>
-              </span>
-              <span class="meta-badge">SKU: @{{ product.sku }}</span>
-              @if ($product['brand_id'])
-                <a href="{{ shop_route('brands.show', $product['brand_id']) }}" class="meta-badge meta-brand">{{ $product['brand_name'] }}</a>
-              @endif
-              @if ($product['gunit_text'])
-                <span class="meta-badge">{{ $product['gunit_text'] }}</span>
-              @endif
-            </div>
+          @endif
+        </div>
+        {{-- Mobile-only compact meta strip — outside d-flex, sits below image --}}
+        <div class="mobile-meta-strip">
+          <span class="meta-badge" :class="product.quantity > 0 ? 'in-stock' : 'out-stock'">
+            <i class="bi bi-circle-fill"></i>
+            <template v-if="product.quantity > 0">{{ __('shop/products.in_stock') }}</template>
+            <template v-else>{{ __('shop/products.out_stock') }}</template>
+          </span>
+          <span class="meta-badge">SKU: @{{ product.sku }}</span>
+          @if ($product['brand_id'])
+            <a href="{{ shop_route('brands.show', $product['brand_id']) }}" class="meta-badge meta-brand">{{ $product['brand_name'] }}</a>
+          @endif
+          @if ($product['gunit_text'])
+            <span class="meta-badge">{{ $product['gunit_text'] }}</span>
           @endif
         </div>
       </div>
