@@ -90,82 +90,101 @@
       /* hide desktop stock-and-sku on mobile */
       .stock-and-sku { display: none; }
 
-      /* mobile cart block under image */
+      /* ── Mobile cart block ── */
       .mobile-cart-block {
-        padding: 12px 16px 14px;
+        padding: 10px 16px 14px;
         background: #fff;
         border-top: 1px solid #f0f0f0;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
       }
-      .mobile-cart-block .quantity-btns {
+      /* Row 1: stepper + wishlist */
+      .mcb-row1 {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
       }
-      /* quantity stepper */
-      .mobile-cart-block .quantity-wrap {
-        flex-shrink: 0;
+      .mcb-qty {
         display: flex;
         align-items: center;
-        border: 1.5px solid #e0e0e0;
+        border: 1.5px solid #ddd;
         border-radius: 10px;
         overflow: hidden;
-        height: 42px;
+        height: 40px;
+        flex: 1;
+        max-width: 140px;
       }
-      .mobile-cart-block .quantity-wrap .form-control {
-        width: 48px;
-        text-align: center;
+      .mcb-qty-btn {
+        width: 40px;
+        height: 100%;
         border: none;
-        border-radius: 0;
-        padding: 0;
+        background: #f7f7f7;
+        font-size: 1.2rem;
+        font-weight: 400;
+        color: #333;
+        cursor: pointer;
+        flex-shrink: 0;
+      }
+      .mcb-qty-btn:active { background: #ececec; }
+      .mcb-qty input {
+        flex: 1;
+        border: none;
+        text-align: center;
         font-weight: 700;
         font-size: 0.95rem;
+        padding: 0;
         height: 100%;
-        box-shadow: none;
+        box-shadow: none !important;
+        min-width: 0;
       }
-      /* Add to cart */
-      .mobile-cart-block .add-cart {
-        flex: 1;
-        height: 42px;
-        padding: 0 10px;
-        font-size: 0.8rem;
-        font-weight: 700;
+      .mcb-wish {
+        width: 40px;
+        height: 40px;
+        border: 1.5px solid #ddd;
         border-radius: 10px;
-        border: 1.5px solid #222;
-        white-space: nowrap;
-        letter-spacing: 0.2px;
-      }
-      /* Buy now */
-      .mobile-cart-block .btn-buy-now {
-        flex: 1;
-        height: 42px;
-        padding: 0 10px;
-        font-size: 0.8rem;
-        font-weight: 700;
-        border-radius: 10px;
-        background: #fd560f;
-        border: none;
-        white-space: nowrap;
-        letter-spacing: 0.2px;
-      }
-      .mobile-cart-block .btn-buy-now:not(:disabled):active {
-        background: #e04a0a;
-      }
-      /* wishlist icon button */
-      .mobile-cart-block .btn-link {
-        flex-shrink: 0;
-        width: 42px;
-        height: 42px;
+        background: #fff;
         display: flex;
         align-items: center;
         justify-content: center;
-        border: 1.5px solid #e0e0e0;
-        border-radius: 10px;
-        padding: 0;
-        text-decoration: none;
+        font-size: 18px;
         color: #555;
+        cursor: pointer;
+        flex-shrink: 0;
       }
-      .mobile-cart-block .btn-link i { font-size: 17px; line-height: 1; }
-      .mobile-cart-block button:disabled { opacity: 0.45; }
+      .mcb-wish:active { background: #fafafa; }
+      /* Row 2: action buttons */
+      .mcb-row2 {
+        display: flex;
+        gap: 8px;
+      }
+      .mcb-btn-cart, .mcb-btn-buy {
+        flex: 1;
+        height: 44px;
+        border-radius: 10px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        letter-spacing: 0.2px;
+        transition: opacity 0.15s;
+      }
+      .mcb-btn-cart {
+        background: #fff;
+        border: 1.5px solid #222;
+        color: #222;
+      }
+      .mcb-btn-buy {
+        background: #fd560f;
+        color: #fff;
+      }
+      .mcb-btn-cart:active { background: #f5f5f5; }
+      .mcb-btn-buy:active  { background: #e04a0a; }
+      .mcb-btn-cart:disabled, .mcb-btn-buy:disabled { opacity: 0.4; cursor: not-allowed; }
     }
     @media (min-width: 992px) {
       .stock-and-sku { display: block; }
@@ -456,21 +475,27 @@
         {{-- Mobile-only cart buttons, shown directly under image --}}
         @if ($product['active'])
           <div class="mobile-cart-block d-lg-none">
-            <div class="quantity-btns">
-              <div class="quantity-wrap">
+            {{-- Row 1: qty stepper + wishlist --}}
+            <div class="mcb-row1">
+              <div class="mcb-qty">
+                <button type="button" class="mcb-qty-btn" onclick="let i=this.nextElementSibling;i.stepDown();i.dispatchEvent(new Event('input'))">−</button>
                 <input type="number" class="form-control" :disabled="!product.quantity" v-model.number="quantity" @blur="validateQuantity" name="quantity" :min="minQuantity" :step="minQuantity">
+                <button type="button" class="mcb-qty-btn" onclick="let i=this.previousElementSibling;i.stepUp();i.dispatchEvent(new Event('input'))">+</button>
               </div>
-              <button class="btn btn-outline-dark ms-2 add-cart fw-bold" :product-id="product.id" :product-price="product.price" :disabled="!product.quantity" @click="addCart(false, this)">
-                <i class="bi bi-cart-fill me-1"></i>{{ __('shop/products.add_to_cart') }}
-              </button>
-              <button class="btn btn-dark ms-2 btn-buy-now fw-bold" :disabled="!product.quantity" :product-id="product.id" :product-price="product.price" @click="addCart(true, this)">
-                <i class="bi bi-bag-fill me-1"></i>{{ __('shop/products.buy_now') }}
-              </button>
               @if (current_customer() || !request('iframe'))
-                <button class="btn btn-link text-secondary ms-1 p-0" data-in-wishlist="{{ $product['in_wishlist'] }}" onclick="bk.addWishlist('{{ $product['id'] }}', this)">
-                  <i class="bi bi-heart{{ $product['in_wishlist'] ? '-fill' : '' }} fs-5"></i>
+                <button class="mcb-wish" data-in-wishlist="{{ $product['in_wishlist'] }}" onclick="bk.addWishlist('{{ $product['id'] }}', this)">
+                  <i class="bi bi-heart{{ $product['in_wishlist'] ? '-fill text-danger' : '' }}"></i>
                 </button>
               @endif
+            </div>
+            {{-- Row 2: main action buttons --}}
+            <div class="mcb-row2">
+              <button class="mcb-btn-cart add-cart" :product-id="product.id" :product-price="product.price" :disabled="!product.quantity" @click="addCart(false, this)">
+                <i class="bi bi-cart-fill"></i> {{ __('shop/products.add_to_cart') }}
+              </button>
+              <button class="mcb-btn-buy btn-buy-now" :disabled="!product.quantity" :product-id="product.id" :product-price="product.price" @click="addCart(true, this)">
+                <i class="bi bi-bag-fill"></i> {{ __('shop/products.buy_now') }}
+              </button>
             </div>
           </div>
         @endif
