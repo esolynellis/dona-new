@@ -89,6 +89,34 @@
       .meta-badge.meta-brand { background: #fff3e0; color: #e65100; }
       /* hide desktop stock-and-sku on mobile */
       .stock-and-sku { display: none; }
+
+      /* mobile cart block under image */
+      .mobile-cart-block {
+        padding: 12px 16px 16px;
+        background: #fff;
+        border-top: 1px solid #f0f0f0;
+      }
+      .mobile-cart-block .quantity-btns {
+        display: flex;
+        align-items: center;
+        gap: 0;
+      }
+      .mobile-cart-block .quantity-wrap { flex-shrink: 0; width: 60px; }
+      .mobile-cart-block .quantity-wrap .form-control {
+        text-align: center;
+        padding: 8px 4px;
+        font-weight: 600;
+      }
+      .mobile-cart-block .add-cart {
+        flex: 1;
+        padding: 10px 8px;
+        font-size: 0.82rem;
+      }
+      .mobile-cart-block .btn-buy-now {
+        flex: 1;
+        padding: 10px 8px;
+        font-size: 0.82rem;
+      }
     }
     @media (min-width: 992px) {
       .stock-and-sku { display: block; }
@@ -376,6 +404,27 @@
             <span class="meta-badge">{{ $product['gunit_text'] }}</span>
           @endif
         </div>
+        {{-- Mobile-only cart buttons, shown directly under image --}}
+        @if ($product['active'])
+          <div class="mobile-cart-block d-lg-none">
+            <div class="quantity-btns">
+              <div class="quantity-wrap">
+                <input type="number" class="form-control" :disabled="!product.quantity" v-model.number="quantity" @blur="validateQuantity" name="quantity" :min="minQuantity" :step="minQuantity">
+              </div>
+              <button class="btn btn-outline-dark ms-2 add-cart fw-bold" :product-id="product.id" :product-price="product.price" :disabled="!product.quantity" @click="addCart(false, this)">
+                <i class="bi bi-cart-fill me-1"></i>{{ __('shop/products.add_to_cart') }}
+              </button>
+              <button class="btn btn-dark ms-2 btn-buy-now fw-bold" :disabled="!product.quantity" :product-id="product.id" :product-price="product.price" @click="addCart(true, this)">
+                <i class="bi bi-bag-fill me-1"></i>{{ __('shop/products.buy_now') }}
+              </button>
+              @if (current_customer() || !request('iframe'))
+                <button class="btn btn-link text-secondary ms-1 p-0" data-in-wishlist="{{ $product['in_wishlist'] }}" onclick="bk.addWishlist('{{ $product['id'] }}', this)">
+                  <i class="bi bi-heart{{ $product['in_wishlist'] ? '-fill' : '' }} fs-5"></i>
+                </button>
+              @endif
+            </div>
+          </div>
+        @endif
       </div>
 
       <div class="col-12 col-lg-6">
@@ -468,7 +517,7 @@
           </div>
           @endhookwrapper
 
-          <div class="product-btns">
+          <div class="product-btns d-none d-lg-flex">
             @if ($product['active'])
               <div class="quantity-btns">
                 @hook('product.detail.buy.before')
