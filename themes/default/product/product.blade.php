@@ -16,27 +16,83 @@
   <style>
     /* ── Mobile back button ── */
     .mobile-back-bar {
+      display: none;
       position: sticky;
       top: 0;
-      z-index: 100;
-      background: #fff;
-      padding: 10px 16px;
-      border-bottom: 1px solid #f0f0f0;
+      z-index: 200;
+      background: rgba(255,255,255,0.96);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding: 8px 16px;
+      border-bottom: 1px solid rgba(0,0,0,0.07);
+      box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+    }
+    @media (max-width: 991.98px) {
+      .mobile-back-bar { display: flex; align-items: center; gap: 12px; }
     }
     .mobile-back-btn {
-      background: none;
-      border: none;
-      font-size: 15px;
-      color: #333;
-      padding: 4px 0;
       display: flex;
       align-items: center;
-      gap: 6px;
+      justify-content: center;
+      width: 34px; height: 34px;
+      background: #f5f5f5;
+      border: none;
+      border-radius: 50%;
+      color: #222;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.18s;
     }
-    .mobile-back-btn i { font-size: 18px; }
+    .mobile-back-btn:active { background: #e8e8e8; }
+    .mobile-back-btn i { font-size: 16px; line-height: 1; }
+    .mobile-back-bar .back-product-name {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #222;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      flex: 1;
+    }
 
     /* ── Product image skeleton ── */
     .product-main-img { min-height: 200px; background: #f5f5f5; }
+
+    /* ── Mobile meta strip (under image) ── */
+    .mobile-meta-strip {
+      display: none;
+    }
+    @media (max-width: 991.98px) {
+      .mobile-meta-strip {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 10px 16px 6px;
+        background: #fff;
+      }
+      .meta-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        padding: 3px 10px;
+        border-radius: 99px;
+        background: #f5f5f5;
+        color: #555;
+        text-decoration: none;
+      }
+      .meta-badge.in-stock  { background: #e8f5e9; color: #2e7d32; }
+      .meta-badge.out-stock { background: #fce4ec; color: #c62828; }
+      .meta-badge.in-stock  i,
+      .meta-badge.out-stock i { font-size: 8px; }
+      .meta-badge.meta-brand { background: #fff3e0; color: #e65100; }
+      /* hide desktop stock-and-sku on mobile */
+      .stock-and-sku { display: none; }
+    }
+    @media (min-width: 992px) {
+      .stock-and-sku { display: block; }
+    }
 
     /* ── Product description standalone section ── */
     .product-description {
@@ -255,15 +311,17 @@
 
 @section('content')
   @if (!request('iframe'))
-    @if(is_mobile())
-      <div class="mobile-back-bar d-lg-none">
-        <button onclick="history.length > 1 ? history.back() : (window.location='/')" class="mobile-back-btn">
-          <i class="bi bi-arrow-left"></i> Буцах
-        </button>
-      </div>
-    @else
+    {{-- Mobile back bar (CSS controls visibility, no PHP user-agent check) --}}
+    <div class="mobile-back-bar">
+      <button onclick="history.length > 1 ? history.back() : (window.location='/')" class="mobile-back-btn" aria-label="Буцах">
+        <i class="bi bi-chevron-left"></i>
+      </button>
+      <span class="back-product-name">{{ $product['name'] }}</span>
+    </div>
+    {{-- Desktop breadcrumb --}}
+    <div class="d-none d-lg-block">
       <x-shop-breadcrumb type="product" :value="$product['id']" />
-    @endif
+    </div>
   @endif
 
   <div class="container {{ request('iframe') ? 'pt-4' : '' }}" id="product-app" v-cloak>
@@ -300,6 +358,21 @@
                 </div>
               </div>
               <div class="swiper-pagination mobile-pagination"></div>
+            </div>
+            {{-- Mobile-only compact meta strip, sits directly under the image --}}
+            <div class="mobile-meta-strip">
+              <span class="meta-badge" :class="product.quantity > 0 ? 'in-stock' : 'out-stock'">
+                <i class="bi bi-circle-fill"></i>
+                <template v-if="product.quantity > 0">{{ __('shop/products.in_stock') }}</template>
+                <template v-else>{{ __('shop/products.out_stock') }}</template>
+              </span>
+              <span class="meta-badge">SKU: @{{ product.sku }}</span>
+              @if ($product['brand_id'])
+                <a href="{{ shop_route('brands.show', $product['brand_id']) }}" class="meta-badge meta-brand">{{ $product['brand_name'] }}</a>
+              @endif
+              @if ($product['gunit_text'])
+                <span class="meta-badge">{{ $product['gunit_text'] }}</span>
+              @endif
             </div>
           @endif
         </div>
