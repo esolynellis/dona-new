@@ -160,11 +160,43 @@
     </div>
   </div>
   <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvas-mobile-menu">
-    <div class="offcanvas-header">
-      <h5 class="offcanvas-title" id="offcanvasWithBothOptionsLabel">{{ __('common.menu') }}</h5>
+    <div class="offcanvas-header border-bottom pb-3">
+      <img src="{{ asset('upload/' . system_setting('base.logo')) }}" alt="logo" style="height:32px;object-fit:contain;" onerror="this.style.display='none'">
       <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
-    <div class="offcanvas-body mobile-menu-wrap">
+    <div class="offcanvas-body mobile-menu-wrap p-0">
+      @php $mobileCategories = \Beike\Repositories\CategoryRepo::getTwoLevelCategories(); @endphp
+      @if(!empty($mobileCategories))
+        <div class="accordion accordion-flush" id="mobile-cat-accordion">
+          @foreach($mobileCategories as $i => $cat)
+            <div class="accordion-item">
+              <div class="nav-item-text d-flex align-items-center justify-content-between px-3">
+                <a class="nav-link py-3 flex-grow-1" href="{{ shop_route('categories.show', $cat['id']) }}">
+                  {{ $cat['name'] }}
+                </a>
+                @if(!empty($cat['children']))
+                  <span class="collapsed px-2 py-3" data-bs-toggle="collapse" data-bs-target="#mob-cat-{{ $i }}" style="cursor:pointer">
+                    <i class="bi bi-chevron-down" style="font-size:13px"></i>
+                  </span>
+                @endif
+              </div>
+              @if(!empty($cat['children']))
+                <div class="accordion-collapse collapse" id="mob-cat-{{ $i }}" data-bs-parent="#mobile-cat-accordion">
+                  <ul class="nav flex-column ul-children ps-3 pb-2">
+                    @foreach($cat['children'] as $child)
+                      <li class="nav-item">
+                        <a class="nav-link px-3 py-2 text-muted" href="{{ shop_route('categories.show', $child['id']) }}">
+                          {{ $child['name'] }}
+                        </a>
+                      </li>
+                    @endforeach
+                  </ul>
+                </div>
+              @endif
+            </div>
+          @endforeach
+        </div>
+      @endif
       @include('shared.menu-mobile')
     </div>
   </div>
