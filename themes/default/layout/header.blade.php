@@ -26,6 +26,11 @@
   }
   .mcv-close:hover { opacity: 1; }
 
+  #offcanvas-mobile-menu {
+    width: 100vw !important;
+    max-width: 100vw !important;
+  }
+
   .mobile-cat-list {
     list-style: none;
     margin: 0;
