@@ -201,7 +201,7 @@
   <div class="header-mobile d-lg-none">
     <div class="mobile-content">
       <div class="left">
-        <div class="mobile-open-menu"><i class="bi bi-list"></i></div>
+        <div class="mobile-open-menu" data-bs-toggle="offcanvas" data-bs-target="#offcanvas-mobile-menu" aria-controls="offcanvas-mobile-menu"><i class="bi bi-list"></i></div>
         <div class="mobile-open-search" href="#offcanvas-search-top" data-bs-toggle="offcanvas" aria-controls="offcanvasExample">
           <i class="iconfont">&#xe8d6;</i>
         </div>
