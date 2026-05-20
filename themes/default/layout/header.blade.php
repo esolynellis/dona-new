@@ -227,25 +227,25 @@
         <i class="bi bi-x-lg"></i>
       </button>
     </div>
-    <div class="offcanvas-body p-0">
-      @php $mobileCategories = \Beike\Repositories\CategoryRepo::getTwoLevelCategories(); @endphp
+    <div class="offcanvas-body p-0" style="background:#fff;">
+      @php
+        function renderMobileCategories($cats, $depth = 0) {
+            foreach ($cats as $cat) {
+                $indent = $depth * 14;
+                echo '<li class="' . ($depth === 0 ? 'parent' : 'child') . '">';
+                echo '<a href="' . shop_route('categories.show', $cat['id']) . '" style="padding-left:' . (20 + $indent) . 'px">';
+                echo '<span>' . e($cat['name']) . '</span>';
+                echo '<i class="bi bi-chevron-right"></i>';
+                echo '</a></li>';
+                if (!empty($cat['children'])) {
+                    renderMobileCategories($cat['children'], $depth + 1);
+                }
+            }
+        }
+        $mobileCategories = \Beike\Repositories\FlattenCategoryRepo::getCategoryList();
+      @endphp
       <ul class="mobile-cat-list">
-        @foreach($mobileCategories as $cat)
-          <li class="parent">
-            <a href="{{ shop_route('categories.show', $cat['id']) }}">
-              <span>{{ $cat['name'] }}</span>
-              <i class="bi bi-chevron-right"></i>
-            </a>
-          </li>
-          @foreach($cat['children'] ?? [] as $child)
-            <li class="child">
-              <a href="{{ shop_route('categories.show', $child['id']) }}">
-                <span>{{ $child['name'] }}</span>
-                <i class="bi bi-chevron-right"></i>
-              </a>
-            </li>
-          @endforeach
-        @endforeach
+        @php renderMobileCategories($mobileCategories); @endphp
       </ul>
     </div>
   </div>
