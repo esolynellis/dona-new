@@ -785,6 +785,8 @@ header .top-wrap .dropdown:hover .dropdown-menu {
   display: block;
   border: none;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  z-index: 1050;
+  position: absolute;
 }
 header .top-wrap .dropdown:hover .dropdown-menu.dropdown-menu-end {
   right: 0;
@@ -813,7 +815,7 @@ header .header-content .dropdown:hover .dropdown-menu {
 header .header-content {
   position: relative;
   background-color: #fff;
-  padding: 1rem 0;
+  padding: 0.4rem 0;
   transition: all 0.2s ease-in-out;
   border-bottom: 1px solid #eee;
 }
