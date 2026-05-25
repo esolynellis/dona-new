@@ -2200,6 +2200,13 @@ body.page-checkout {
   background-color: #f6f8fa;
 }
 @media (max-width: 992px) {
+  body.page-checkout {
+    padding-bottom: 80px !important;
+  }
+  /* checkout дээр dona bottom nav нуух — checkout өөрийн fixed bar-тай */
+  body.page-checkout .dona-bottom-nav {
+    display: none !important;
+  }
   body.page-checkout .submit-checkout-wrap {
     position: fixed;
     left: 0;
@@ -2345,6 +2352,11 @@ body.page-checkout .checkout-title .btn.icon, body.page-bk-stripe .checkout-titl
 @media (min-width: 768px) {
   body.page-checkout .total-wrap .card-body, body.page-bk-stripe .total-wrap .card-body {
     padding: 0;
+  }
+}
+@media (max-width: 768px) {
+  body.page-checkout .total-wrap .card-body, body.page-bk-stripe .total-wrap .card-body {
+    padding-bottom: 16px;
   }
 }
 body.page-checkout .total-wrap .card-header, body.page-bk-stripe .total-wrap .card-header {
@@ -3354,4 +3366,11 @@ body.page-brands .curser-list > li > a:active {
   .module-image-402 .image-wrap .img-name span {
     font-size: 0.7rem;
   }
+}
+
+/* Нийт тээвэрлэлтийн зардал - бусад элементээс дээр харагдах */
+.total-shipping-cost {
+  position: relative;
+  z-index: 9999;
+  background: #fff;
 }
