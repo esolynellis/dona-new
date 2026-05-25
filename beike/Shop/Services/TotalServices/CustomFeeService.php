@@ -47,7 +47,7 @@ class CustomFeeService
 
         $totalService->totals[] = [
             'code'          => 'transport_subtotal',
-            'title'         => 'Нийт тээвэрлэлтийн дүн',
+            'title'         => 'Эрээн хот хүртэлх нийт тээвэрлэлтийн дүн',
             'amount'        => $feeTotal,
             'amount_format' => currency_format($feeTotal),
             'is_subtotal'   => true,
