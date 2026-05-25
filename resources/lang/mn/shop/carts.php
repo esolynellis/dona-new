@@ -11,7 +11,7 @@
 
 return [
 'index'                    => 'Сав',
-'added_to_cart'            => 'Савт бүртгэгдсэн',
+'added_to_cart'            => 'Сагсанд нэмэгдлээ',
 'select_all'               => 'Бүгдийг сонгох',
 'commodity'                => 'Бүтээгдэхүүн',
 'quantity'                 => 'Хэмжээ',

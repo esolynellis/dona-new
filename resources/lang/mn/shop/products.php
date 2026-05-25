@@ -12,7 +12,7 @@
 return [
 'search'           => 'Хайх',
 'add_to_favorites' => 'Санал болгох',
-'add_to_cart'      => 'Савт нэмэх',
+'add_to_cart'      => 'Сагсанд нэмэх',
 'buy_now'          => 'Шууд авах',
 'product_details'  => 'Бүтээгдэхүүний дэлгэрэнгүй мэдээлэл',
 'in_stock'         => 'Зардлаа',
